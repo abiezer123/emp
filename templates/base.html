@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Attendance App - {% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+  {% if session.user_id %}
+  <div class="sidebar" role="navigation" aria-label="Main Navigation">
+      <h2>AttendanceApp</h2>
+      <ul class="nav-links">
+          <li><a href="{{ url_for('dashboard') }}" class="{% if active_page=='dashboard' %}active{% endif %}">Dashboard</a></li>
+          <li><a href="{{ url_for('attendance') }}" class="{% if active_page=='attendance' %}active{% endif %}">Attendance</a></li>
+          <li><a href="{{ url_for('members') }}" class="{% if active_page=='members' %}active{% endif %}">Members</a></li>
+          <li><a href="{{ url_for('feedback') }}" class="{% if active_page=='feedback' %}active{% endif %}">Feedback</a></li>
+      </ul>
+      <div class="sidebar-footer">
+          Logged in as<br>
+          <strong>{{ current_user.username }}</strong><br>
+          <form method="POST" action="{{ url_for('logout') }}" style="margin-top: 0.5rem;">
+              <button class="btn-logout" type="submit" aria-label="Logout">Logout</button>
+          </form>
+      </div>
+  </div>
+  <main class="main-content" role="main">
+      <header>
+          <h1>{% block page_title %}{% endblock %}</h1>
+      </header>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="flash-message" role="alert">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+  </main>
+  {% else %}
+  <main class="main-content">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash-message" role="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  {% endif %}
+</body>
+</html>

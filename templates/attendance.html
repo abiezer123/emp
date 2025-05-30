@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Attendance Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2>Menu</h2>
+            <div class="nav-item active" data-tab="attendance">Attendance</div>
+            <div class="nav-item" data-tab="dashboard">Dashboard</div>
+            <div class="nav-item" data-tab="member">Member</div>
+        </nav>
+        <main>
+            <section id="attendance">
+                <h2>Attendance</h2>
+                <form id="attendance-form" autocomplete="off">
+                    <input type="text" id="name" placeholder="Enter name" required />
+                    <input type="datetime-local" id="date" required />
+                    <button type="submit">Submit</button>
+                </form>
+                <h3>Attendance list for selected date</h3>
+                <input type="date" id="filter-date" />
+                <table id="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Date &amp; Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <section id="dashboard" class="hidden">
+                <h2>Dashboard</h2>
+                <p>This is the dashboard section.</p>
+            </section>
+           
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('date');
+            const now = new Date();
+            const formattedDate = now.toISOString().slice(0, 16);
+            dateInput.value = formattedDate;
+        });
+    </script>
+</body>
+
+</html>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+  }
+
+  // Set both date and time to NOW on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('date');
+    const now = new Date();
+    const formattedDate = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+    if (!dateInput.value) {
+      dateInput.value = formattedDate;
+    }
+
+    // Set filter-date to today's date
+    const filterDateInput = document.getElementById('filter-date');
+    filterDateInput.value = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    loadRecordsForFilterDate(); // Load initial records
+  });
+</script>
+
+</body>
+</html>

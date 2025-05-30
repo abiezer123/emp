@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block page_title %}Login{% endblock %}
+{% block content %}
+<form method="POST" action="{{ url_for('login') }}" aria-label="Login form" class="login-form">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" required autocomplete="username" autofocus />
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required autocomplete="current-password" />
+    <input type="submit" value="Login" />
+</form>
+<p>For testing, create users directly in MongoDB with hashed passwords or plain text passwords.</p>
+{% endblock %}
