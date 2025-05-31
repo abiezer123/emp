@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Attendance Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js for the graph -->
+    
 </head>
 <body>
     <div class="container">
@@ -19,10 +21,14 @@
             <section id="attendance">
                 <h2>Attendance</h2>
                 <form id="attendance-form" autocomplete="off">
-                    <input type="text" id="name" placeholder="Enter name" required />
+                    <div class="suggestions-container">
+                        <input type="text" id="name" placeholder="Enter name" required />
+                        <ul id="suggestions" class="suggestions-list hidden"></ul> <!-- Suggestions dropdown -->
+                    </div>
                     <input type="datetime-local" id="date" required />
                     <button type="submit">Submit</button>
                 </form>
+
                 <h3>Attendance list for selected date</h3>
                 <input type="date" id="filter-date" />
                 <table id="attendance-table">
@@ -37,18 +43,55 @@
                     <tbody></tbody>
                 </table>
             </section>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
+
+
+
             <section id="dashboard" class="hidden">
                 <h2>Dashboard</h2>
-                <p>This is the dashboard section.</p>
+                 <div class="dashboard-controls">
+                    <label for="timeframe">View by:</label>
+                    <select id="timeframe" onchange="updateUI()">
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                    <label id="dateLabel" for="dateSelect">Select Month:</label>
+                    <input type="month" id="dateSelect" />
+                    <button onclick="fetchData()">Load Data</button>
+                </div>
+                <canvas id="attendanceChart" style="max-width: 900px; margin-top: 2rem;"></canvas>
+                <h3>Top Attendees</h3>
+                    <table id="rankingTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Attendance Count</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <h3>Attendance Summary</h3>
+                <table id="summaryTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Attendance Count</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </section>
-           
         </main>
     </div>
+    <!-- Add this modal for delete confirmation -->
+    <div id="delete-confirmation" class="modal hidden">
+        <div class="modal-content">
+            <p>Are you sure you want to delete this entry?</p>
+            <button id="confirm-delete">Yes</button>
+            <button id="cancel-delete">No</button>
+        </div>
+    </div>
+
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
@@ -61,34 +104,41 @@
             const now = new Date();
             const formattedDate = now.toISOString().slice(0, 16);
             dateInput.value = formattedDate;
+
+            // Set filter-date to today's date
+            const filterDateInput = document.getElementById('filter-date');
+            filterDateInput.value = now.toISOString().slice(0, 10); // YYYY-MM-DD
+            loadRecordsForFilterDate(); // Load initial records
+
+            // Load the attendance chart
+            loadAttendanceChart();
         });
+
+        function loadAttendanceChart() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'], // Example labels
+                    datasets: [{
+                        label: 'Number of Attendees',
+                        data: [12, 19, 3, 5, 2], // Example data
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
     </script>
-</body>
-
-</html>
-
-
-<script src="{{ url_for('static', filename='script.js') }}"></script>
-<script>
-  function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("open");
-  }
-
-  // Set both date and time to NOW on page load
-  window.addEventListener('DOMContentLoaded', () => {
-    const dateInput = document.getElementById('date');
-    const now = new Date();
-    const formattedDate = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
-    if (!dateInput.value) {
-      dateInput.value = formattedDate;
-    }
-
-    // Set filter-date to today's date
-    const filterDateInput = document.getElementById('filter-date');
-    filterDateInput.value = now.toISOString().slice(0, 10); // YYYY-MM-DD
-    loadRecordsForFilterDate(); // Load initial records
-  });
-</script>
-
 </body>
 </html>

@@ -65,6 +65,10 @@ form {
     margin-bottom: 20px;
 }
 
+.suggestions-container {
+    position: relative; /* For absolute positioning of suggestions */
+}
+
 input[type="text"],
 input[type="datetime-local"],
 input[type="date"] {
@@ -142,6 +146,7 @@ tr:last-child td {
     min-height: 250px;
     color: #666;
 }
+
 .menu-toggle {
     display: none;
     background: #3498db;
@@ -160,22 +165,90 @@ tr:last-child td {
     }
 
     .sidebar {
-        width: 100%;
-        border-radius: 0;
-        padding: 10px;
-        display: none;
+        width: 0;
+        padding: 20px 0;
+        position: fixed; /* Keep sidebar off-screen */
+        z-index: 1000;
+        height: 100vh;
+        overflow-x: hidden;
     }
 
     .sidebar.open {
-        display: block;
+        width: 200px;
+        padding: 20px;
     }
 
     .menu-toggle {
-        display: inline-block;
+        display: block;
+        background: none;
+        border: none;
+        color: #ecf0f1;
+        font-size: 1.8rem;
+        cursor: pointer;
+        align-self: flex-start; /* Align to the start of the flex container */
+        margin-bottom: 20px;
+        padding: 0 10px;
     }
+
 
     main {
         border-radius: 0;
         box-shadow: none;
     }
+}
+
+/* Suggestions dropdown styles */
+.suggestions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    background: white;
+    width: 100%; /* Full width of the input */
+    box-sizing: border-box; /* Include padding and border in width */
+    z-index: 1000;
+    border-radius: 0 0 5px 5px; /* Rounded corners at the bottom */
+}
+
+.suggestions-list li {
+    padding: 12px; /* Increased padding for better touch target */
+    cursor: pointer;
+    font-size: 1rem; /* Base font size */
+}
+
+/* Hover effect for suggestions */
+.suggestions-list li:hover {
+    background-color: #f0f0f0;
+}
+
+/* Hide suggestions */
+.hidden {
+    display: none;
+}
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
 }
