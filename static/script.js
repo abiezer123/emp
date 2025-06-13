@@ -20,6 +20,7 @@ const suggestionsList = document.getElementById('suggestions');
 let attendanceChartInstance = null; // To hold the Chart.js instance
 let currentDeleteId = null; // Store the ID of the record to delete
 
+
 function updateUI() {
     const timeframe = timeframeSelect.value;
     if (timeframe === 'monthly') {
@@ -27,13 +28,183 @@ function updateUI() {
         dateLabel.textContent = 'Select Month:';
         const now = new Date();
         dateSelect.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-    } else { // yearly
+    } else if (timeframe === 'yearly') {
         dateSelect.type = 'number';
         dateLabel.textContent = 'Select Year:';
+        dateSelect.min = 2000;
+        dateSelect.max = new Date().getFullYear();
         dateSelect.value = new Date().getFullYear();
     }
-    fetchData(); // Fetch data when UI updates
+    fetchData();
 }
+
+function formatXAxisLabel(dateString, timeframe) {
+    const date = new Date(dateString);
+    if (timeframe === 'yearly') {
+        const options = { month: 'short', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    } else {
+        return date.getDate().toString();
+    }
+}
+
+function updateAttendanceChart(summaryData, timeframe) {
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+    if (attendanceChartInstance) {
+        attendanceChartInstance.destroy();
+        attendanceChartInstance = null;
+    }
+
+    if (!summaryData || summaryData.length === 0) {
+        // clear canvas or show message if needed
+        return;
+    }
+
+    const labels = summaryData.map(item => formatXAxisLabel(item.date, timeframe));
+    const data = summaryData.map(item => item.count);
+
+    attendanceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Number of Attendees',
+                data,
+                borderColor: 'rgba(52, 152, 219, 1)',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.2,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'nearest',
+                intersect: false
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.parsed.y} attendees`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    },
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 20,
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Attendance Count'
+                    },
+                    suggestedMax: Math.max(...data) + 5
+                }
+            }
+        }
+    });
+}
+
+// Keep other existing code like renderTopAttendees, renderAttendanceSummary...
+
+window.addEventListener('DOMContentLoaded', () => {
+    initializeDashboard();
+});
+
+
+// Update Chart with attendance data using Chart.js
+function updateAttendanceChart(summaryData) {
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const timeframe = timeframeSelect.value;
+
+    if (!summaryData || summaryData.length === 0) {
+        // Clear chart or show "No data"
+        if (attendanceChartInstance) {
+            attendanceChartInstance.destroy();
+            attendanceChartInstance = null;
+        }
+        // Optional: Display message or blank
+        return;
+    }
+
+    // Prepare labels and data points
+    const labels = summaryData.map(item => formatXAxisLabel(item.date, timeframe));
+    const data = summaryData.map(item => item.count);
+
+    // If chart exists, destroy before creating new
+    if (attendanceChartInstance) {
+        attendanceChartInstance.destroy();
+    }
+
+    attendanceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Number of Attendees',
+                data,
+                borderColor: 'rgba(52, 152, 219, 1)',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.2,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'nearest',
+                intersect: false
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.parsed.y} attendees`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    },
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 20,
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Attendance Count'
+                    },
+                    suggestedMax: Math.max(...data) + 5
+                }
+            }
+        }
+    });
+}
+
 
 function initializeDashboard() {
     updateUI(); // Call updateUI to set the initial state of the dashboard

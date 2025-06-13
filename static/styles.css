@@ -224,11 +224,6 @@ tr:last-child td {
     background-color: #f0f0f0;
 }
 
-/* Hide suggestions */
-.hidden {
-    display: none;
-}
-
 .modal {
     display: flex;
     justify-content: center;
