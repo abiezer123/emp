@@ -5,6 +5,11 @@ from bson.objectid import ObjectId
 from datetime import datetime
 from dotenv import load_dotenv
 import re
+from flask import send_file
+from io import BytesIO
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 load_dotenv()  # Load .env file
 
@@ -119,7 +124,6 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
 
-
 @app.route('/api/attendance_summary', methods=['GET'])
 def get_attendance_summary():
     timeframe = request.args.get('timeframe', 'monthly')  # Default to monthly
@@ -127,26 +131,18 @@ def get_attendance_summary():
     
     if not date_str:
         return jsonify({'error': 'Date query parameter is required'}), 400
-
-    if timeframe == 'monthly':
-        try:
+    try:
+        if timeframe == 'monthly':
             year, month = map(int, date_str.split('-'))
             start_date = datetime(year, month, 1)
-            # Calculate the end date for the month
-            if month == 12:
-                end_date = datetime(year + 1, 1, 1)
-            else:
-                end_date = datetime(year, month + 1, 1)
-        except ValueError:
-            return jsonify({'error': 'Invalid date format for monthly summary, expected YYYY-MM'}), 400
-    else:  # yearly
-        try:
+            end_date = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
+        else:  # yearly
             year = int(date_str)
             start_date = datetime(year, 1, 1)
             end_date = datetime(year + 1, 1, 1)
-        except ValueError:
-            return jsonify({'error': 'Invalid date format for yearly summary, expected YYYY'}), 400
-
+    except ValueError:
+        return jsonify({'error': 'Invalid date format, expected YYYY-MM or YYYY'}), 400
+     # MongoDB aggregation pipeline
     pipeline = [
         {
             '$match': {
@@ -155,23 +151,76 @@ def get_attendance_summary():
         },
         {
             '$group': {
-                '_id': { '$dateToString': { format: "%Y-%m-%d", date: "$date" } }, # Group by day for daily counts
+                '_id': { '$dateToString': { 'format': "%Y-%m-%d", 'date': "$date" } },
                 'count': {'$sum': 1}
             }
         },
         {
-            '$sort': {'_id': 1} # Sort by date
+            '$sort': {'_id': 1}
         }
     ]
+    try:
+        cursor = attendance_collection.aggregate(pipeline)
+        summary_data = []
+        for doc in cursor:
+            summary_data.append({
+                'date': doc['_id'],
+                'count': doc['count']
+            })
+        return jsonify(summary_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500  # Return error if aggregation fails
 
-    cursor = attendance_collection.aggregate(pipeline)
-    summary_data = []
-    for doc in cursor:
-        summary_data.append({
-            'date': doc['_id'],
-            'count': doc['count']
-        })
-    return jsonify(summary_data)
+    
+@app.route('/api/download_attendance', methods=['GET'])
+def download_attendance():
+    year = request.args.get('year')
+    month = request.args.get('month')
+    if not year or not month:
+        return jsonify({'error': 'Year and month are required'}), 400
+    try:
+        year_int = int(year)
+        month_int = int(month)
+        start_date = datetime(year_int, month_int, 1)
+        if month_int == 12:
+            end_date = datetime(year_int + 1, 1, 1)
+        else:
+            end_date = datetime(year_int, month_int + 1, 1)
+    except ValueError:
+        return jsonify({'error': 'Invalid year or month format'}), 400
+    cursor = attendance_collection.find({'date': {'$gte': start_date, '$lt': end_date}}).sort('date', 1)
+    # Group attendance by exact date
+    attendance_by_date = {}
+    for record in cursor:
+        date_obj = record['date'].date()
+        if date_obj not in attendance_by_date:
+            attendance_by_date[date_obj] = []
+        attendance_by_date[date_obj].append(record['name'])
+    # Create the DOCX document
+    doc = Document()
+    title = f'Attendance Report for {start_date.strftime("%B %Y")}'
+    doc.add_heading(title, level=1)
+    # For each date, add the date header and numbered list of attendees
+    for date_key in sorted(attendance_by_date.keys()):
+        # Add date with full date format like: June 1, 2025
+        date_paragraph = doc.add_paragraph(date_key.strftime("%B %d, %Y"))
+        date_paragraph.style = 'Heading2'
+        date_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        attendees = attendance_by_date[date_key]
+        # Add numbered list of names
+        for idx, name in enumerate(attendees, start=1):
+            para = doc.add_paragraph(f"{idx}. {name}")
+    # Save to BytesIO
+    doc_io = BytesIO()
+    doc.save(doc_io)
+    doc_io.seek(0)
+    filename = f"attendance_{year}-{str(month).zfill(2)}.docx"
+    return send_file(
+        doc_io,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
 
 @app.route('/api/top_attendees', methods=['GET'])
 def get_top_attendees():
@@ -226,6 +275,7 @@ def get_top_attendees():
         })
 
     return jsonify(top_attendees)
+
 
 
 if __name__ == '__main__':

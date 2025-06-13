@@ -3,8 +3,41 @@ const navItems = document.querySelectorAll('nav .nav-item');
 const sections = {
     attendance: document.getElementById('attendance'),
     dashboard: document.getElementById('dashboard'),
-    member: document.getElementById('member')
 };
+
+const timeframeSelect = document.getElementById('timeframe');
+const dateSelect = document.getElementById('dateSelect');
+const dateLabel = document.getElementById('dateLabel');
+const rankingTableBody = document.querySelector('#rankingTable tbody');
+const summaryTableBody = document.querySelector('#summaryTable tbody');
+const attendanceForm = document.getElementById('attendance-form');
+const attendanceTableBody = document.querySelector('#attendance-table tbody');
+const nameInput = document.getElementById('name');
+const dateInput = document.getElementById('date');
+const filterDateInput = document.getElementById('filter-date');
+const suggestionsList = document.getElementById('suggestions');
+
+let attendanceChartInstance = null; // To hold the Chart.js instance
+let currentDeleteId = null; // Store the ID of the record to delete
+
+function updateUI() {
+    const timeframe = timeframeSelect.value;
+    if (timeframe === 'monthly') {
+        dateSelect.type = 'month';
+        dateLabel.textContent = 'Select Month:';
+        const now = new Date();
+        dateSelect.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+    } else { // yearly
+        dateSelect.type = 'number';
+        dateLabel.textContent = 'Select Year:';
+        dateSelect.value = new Date().getFullYear();
+    }
+    fetchData(); // Fetch data when UI updates
+}
+
+function initializeDashboard() {
+    updateUI(); // Call updateUI to set the initial state of the dashboard
+}
 
 navItems.forEach(item => {
     item.addEventListener('click', () => {
@@ -26,19 +59,6 @@ navItems.forEach(item => {
 });
 
 // Attendance logic
-const attendanceForm = document.getElementById('attendance-form');
-const attendanceTableBody = document.querySelector('#attendance-table tbody');
-const nameInput = document.getElementById('name');
-const dateInput = document.getElementById('date');
-const filterDateInput = document.getElementById('filter-date');
-
-// Helper function to format datetime string nicely
-function formatDateTime(dtString) {
-    const date = new Date(dtString);
-    return date.toLocaleString();
-}
-
-// Fetch attendance records from backend for a specific date (yyyy-mm-dd)
 async function fetchAttendanceRecords(date) {
     attendanceTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Loading...</td></tr>';
     try {
@@ -52,7 +72,6 @@ async function fetchAttendanceRecords(date) {
     }
 }
 
-// Render attendance records in table
 function renderAttendanceTable(records) {
     if (records.length === 0) {
         attendanceTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No records found for this date.</td></tr>';
@@ -62,35 +81,44 @@ function renderAttendanceTable(records) {
     records.forEach((r, index) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${index + 1}</td>          <td>${r.name}</td>
+            <td>${index + 1}</td>
+            <td>${r.name}</td>
             <td>${formatDateTime(r.date)}</td>
             <td><button class="btn-delete" data-id="${r._id}">Delete</button></td>
         `;
         attendanceTableBody.appendChild(tr);
     });
-    // Attach delete handlers
     attachDeleteHandlers();
 }
 
-// Attach delete handlers to delete buttons
 function attachDeleteHandlers() {
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', async (e) => {
-            const id = btn.getAttribute('data-id');
-            if (confirm('Are you sure you want to delete this entry?')) {
-                try {
-                    const res = await fetch('/api/attendance/' + id, { method: 'DELETE' });
-                    if (!res.ok) throw new Error('Failed to delete');
-                    // Refresh list after deletion
-                    loadRecordsForFilterDate();
-                } catch (err) {
-                    alert('Failed to delete attendance entry.');
-                    console.error(err);
-                }
-            }
+            currentDeleteId = btn.getAttribute('data-id'); // Store the ID
+            document.getElementById('delete-confirmation').classList.remove('hidden'); // Show modal
         });
     });
 }
+
+// Confirm delete action
+document.getElementById('confirm-delete').addEventListener('click', async () => {
+    if (currentDeleteId) {
+        try {
+            const res = await fetch('/api/attendance/' + currentDeleteId, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete');
+            loadRecordsForFilterDate(); // Refresh list after deletion
+            document.getElementById('delete-confirmation').classList.add('hidden'); // Hide modal
+        } catch (err) {
+            alert('Failed to delete attendance entry.');
+            console.error(err);
+        }
+    }
+});
+
+// Cancel delete action
+document.getElementById('cancel-delete').addEventListener('click', () => {
+    document.getElementById('delete-confirmation').classList.add('hidden'); // Hide modal
+});
 
 // On form submit, add attendance record
 attendanceForm.addEventListener('submit', async (e) => {
@@ -111,7 +139,6 @@ attendanceForm.addEventListener('submit', async (e) => {
         if (!response.ok) throw new Error('Failed to add attendance');
 
         nameInput.value = '';
-        // Do NOT reset date input; it keeps previous value
         filterDateInput.value = datetime.split('T')[0];
         loadRecordsForFilterDate();
         nameInput.focus();
@@ -143,9 +170,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Suggestions logic
-const suggestionsList = document.getElementById('suggestions');
-
-// Fetch name suggestions from the backend
 nameInput.addEventListener('input', async () => {
     const query = nameInput.value.trim();
     if (query.length === 0) {
@@ -202,64 +226,7 @@ menuToggle.addEventListener('click', () => {
     mainContent.classList.toggle('fullwidth');
 });
 
-let currentDeleteId = null; // Store the ID of the record to delete
-
-// Attach delete handlers
-function attachDeleteHandlers() {
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            currentDeleteId = btn.getAttribute('data-id'); // Store the ID
-            document.getElementById('delete-confirmation').classList.remove('hidden'); // Show modal
-        });
-    });
-}
-
-// Confirm delete action
-document.getElementById('confirm-delete').addEventListener('click', async () => {
-    if (currentDeleteId) {
-        try {
-            const res = await fetch('/api/attendance/' + currentDeleteId, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Failed to delete');
-            loadRecordsForFilterDate(); // Refresh list after deletion
-            document.getElementById('delete-confirmation').classList.add('hidden'); // Hide modal
-        } catch (err) {
-            alert('Failed to delete attendance entry.');
-            console.error(err);
-        }
-    }
-});
-
-// Cancel delete action
-document.getElementById('cancel-delete').addEventListener('click', () => {
-    document.getElementById('delete-confirmation').classList.add('hidden'); // Hide modal
-});
-
-
 // Dashboard logic
-const timeframeSelect = document.getElementById('timeframe');
-const dateSelect = document.getElementById('dateSelect');
-const dateLabel = document.getElementById('dateLabel');
-const rankingTableBody = document.querySelector('#rankingTable tbody');
-const summaryTableBody = document.querySelector('#summaryTable tbody');
-
-let attendanceChartInstance = null; // To hold the Chart.js instance
-
-function updateUI() {
-    const timeframe = timeframeSelect.value;
-    if (timeframe === 'monthly') {
-        dateSelect.type = 'month';
-        dateLabel.textContent = 'Select Month:';
-        // Set default to current month
-        const now = new Date();
-        dateSelect.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-    } else { // yearly
-        dateSelect.type = 'number'; // Using number for year input
-        dateLabel.textContent = 'Select Year:';
-        dateSelect.value = new Date().getFullYear();
-    }
-    fetchData(); // Fetch data when UI updates
-}
-
 async function fetchData() {
     const timeframe = timeframeSelect.value;
     const date = dateSelect.value;
@@ -334,10 +301,12 @@ function updateAttendanceChart(summaryData) {
     const labels = summaryData.map(item => item.date);
     const data = summaryData.map(item => item.count);
 
+    // Check if the chart instance exists and destroy it
     if (attendanceChartInstance) {
         attendanceChartInstance.destroy(); // Destroy existing chart if it exists
     }
 
+    // Create a new chart instance
     attendanceChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -363,10 +332,39 @@ function updateAttendanceChart(summaryData) {
     });
 }
 
+// Format datetime string nicely
+function formatDateTime(dtString) {
+    const date = new Date(dtString);
+    return date.toLocaleString(); // Adjust the format as needed
+}
+
 // Initialize dashboard on load
 window.addEventListener('DOMContentLoaded', () => {
-    // ... (existing DOMContentLoaded logic) ...
-
     // Set initial values for dashboard controls and fetch data
-    updateUI(); // This will set default date and call fetchData
+    initializeDashboard(); // This will set default date and call fetchData
+});
+
+
+document.getElementById('download-btn').addEventListener('click', async () => {
+    const monthInput = document.getElementById('download-month').value;
+    if (!monthInput) {
+        alert('Please select a month.');
+        return;
+    }
+
+    const [year, month] = monthInput.split('-');
+    const response = await fetch(`/api/download_attendance?year=${year}&month=${month}`);
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `attendance_${year}-${month}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } else {
+        alert('Failed to download attendance data.');
+    }
 });

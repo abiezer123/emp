@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="sidebar" id="sidebar">
-            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <button class="menu-toggle" onclick="toggleSidebar()">☰sfdsfdsf</button>
             <h2>Menu</h2>
             <div class="nav-item active" data-tab="attendance">Attendance</div>
             <div class="nav-item" data-tab="dashboard">Dashboard</div>
@@ -26,7 +26,7 @@
                         <ul id="suggestions" class="suggestions-list hidden"></ul> <!-- Suggestions dropdown -->
                     </div>
                     <input type="datetime-local" id="date" required />
-                    <button type="submit">Submit</button>
+                    <button type="submit">Submit</button>   
                 </form>
 
                 <h3>Attendance list for selected date</h3>
@@ -56,7 +56,6 @@
                     </select>
                     <label id="dateLabel" for="dateSelect">Select Month:</label>
                     <input type="month" id="dateSelect" />
-                    <button onclick="fetchData()">Load Data</button>
                 </div>
                 <canvas id="attendanceChart" style="max-width: 900px; margin-top: 2rem;"></canvas>
                 <h3>Top Attendees</h3>
@@ -81,6 +80,15 @@
                     <tbody></tbody>
                 </table>
             </section>
+
+            <br><br><br><br><br>
+            
+            <div>
+                <label for="download-month">Select Month:</label>
+                <input type="month" id="download-month" />
+                <button id="download-btn">Download Attendance</button>
+            </div>
+
         </main>
     </div>
     <!-- Add this modal for delete confirmation -->

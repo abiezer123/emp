@@ -139,7 +139,7 @@ tr:last-child td {
 }
 
 /* Dashboard and Member placeholders */
-#dashboard, #member {
+#dashboard {
     background: white;
     border-radius: 8px;
     padding: 20px;
@@ -150,7 +150,7 @@ tr:last-child td {
 .menu-toggle {
     display: none;
     background: #3498db;
-    color: white;
+    color: black;
     border: none;
     padding: 10px 15px;
     font-size: 18px;
@@ -251,4 +251,14 @@ tr:last-child td {
 
 .hidden {
     display: none;
+}
+
+.login-container{
+    position: relative;
+}
+
+.login-container input,.login-container button{
+    width: 400px;
+    height: 40px;
+    position: center;
 }
