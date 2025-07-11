@@ -155,3 +155,16 @@ tr:last-child td {
 .hidden {
     display: none;
 }
+
+
+.dashboard-heading {
+    margin-top: 50px;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    background-color: #ccc;
+    margin: 2rem 0;
+
+}
