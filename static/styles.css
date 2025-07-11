@@ -69,6 +69,11 @@ button:hover {
     background-color: #2980b9;
 }
 
+#name {
+    width: 240px;
+
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -167,4 +172,8 @@ hr {
     background-color: #ccc;
     margin: 2rem 0;
 
+}
+
+#download-btn {
+    margin-top: 20px;
 }

@@ -20,6 +20,10 @@ window.addEventListener('DOMContentLoaded', () => {
     filterDateInput.value = todayISO;
     loadRecordsForFilterDate();
     updateUI();
+    // Set download-month to current month
+    const now = new Date();
+    const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM
+    document.getElementById('download-month').value = currentMonth;
 });
 
 function updateUI() {
@@ -142,6 +146,12 @@ async function fetchAttendanceRecords(date) {
         attendanceTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#e74c3c;">Error loading records</td></tr>';
         console.error(err);
     }
+}
+
+function formatPrettyDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { month: 'long', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options); // e.g., "June 1"
 }
 
 function renderAttendanceTable(records) {
@@ -347,7 +357,7 @@ function renderAttendanceSummary(summary) {
     summary.forEach(record => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${record.date}</td>
+            <td>${formatPrettyDate(record.date)}</td>
             <td>${record.count}</td>
         `;
         summaryTableBody.appendChild(tr);
