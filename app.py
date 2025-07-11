@@ -8,9 +8,14 @@ import re
 from flask import send_file
 from io import BytesIO
 from docx import Document
+from docx.shared import Inches
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from calendar import monthrange
+from bson.json_util import dumps
+import matplotlib.pyplot as plt
+import io
+
 
 load_dotenv()  # Load .env file
 
@@ -163,53 +168,121 @@ def get_attendance_summary():
     
 @app.route('/api/download_attendance', methods=['GET'])
 def download_attendance():
-    year = request.args.get('year')
-    month = request.args.get('month')
-    if not year or not month:
-        return jsonify({'error': 'Year and month are required'}), 400
-    try:
-        year_int = int(year)
-        month_int = int(month)
-        start_date = datetime(year_int, month_int, 1)
-        if month_int == 12:
-            end_date = datetime(year_int + 1, 1, 1)
-        else:
-            end_date = datetime(year_int, month_int + 1, 1)
-    except ValueError:
-        return jsonify({'error': 'Invalid year or month format'}), 400
-    cursor = attendance_collection.find({'date': {'$gte': start_date, '$lt': end_date}}).sort('date', 1)
-    # Group attendance by exact date
-    attendance_by_date = {}
-    for record in cursor:
-        date_obj = record['date'].date()
-        if date_obj not in attendance_by_date:
-            attendance_by_date[date_obj] = []
-        attendance_by_date[date_obj].append(record['name'])
-    # Create the DOCX document
+    year = int(request.args.get('year'))
+    month = int(request.args.get('month'))
+
+    start_date = datetime(year, month, 1)
+    end_date = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
+
+    # Attendance Records
+    records = list(attendance_collection.find({
+        'date': {'$gte': start_date, '$lt': end_date}
+    }))
+
+    # Top Attendees
+    top_attendees = list(attendance_collection.aggregate([
+        { '$match': { 'date': {'$gte': start_date, '$lt': end_date} } },
+        { '$group': { '_id': '$name', 'count': { '$sum': 1 } } },
+        { '$sort': { 'count': -1 } },
+        { '$limit': 10 }
+    ]))
+
+    # Attendance Summary (grouped by day)
+    summary = list(attendance_collection.aggregate([
+        { '$match': { 'date': {'$gte': start_date, '$lt': end_date} } },
+        { '$group': {
+            '_id': { '$dateToString': { 'format': "%Y-%m-%d", 'date': "$date" }},
+            'count': { '$sum': 1 }
+        }},
+        { '$sort': { '_id': 1 }}
+    ]))
+
+    # Generate Word document
     doc = Document()
-    title = f'Attendance Report for {start_date.strftime("%B %Y")}'
-    doc.add_heading(title, level=1)
-    # For each date, add the date header and numbered list of attendees
-    for date_key in sorted(attendance_by_date.keys()):
-        # Add date with full date format like: June 1, 2025
-        date_paragraph = doc.add_paragraph(date_key.strftime("%B %d, %Y"))
-        date_paragraph.style = 'Heading2'
-        date_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-        attendees = attendance_by_date[date_key]
-        # Add numbered list of names
-        for idx, name in enumerate(attendees, start=1):
-            para = doc.add_paragraph(f"{idx}. {name}")
-    # Save to BytesIO
-    doc_io = BytesIO()
-    doc.save(doc_io)
-    doc_io.seek(0)
-    filename = f"attendance_{year}-{str(month).zfill(2)}.docx"
-    return send_file(
-        doc_io,
-        as_attachment=True,
-        download_name=filename,
-        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
+    doc.add_heading(f'Attendance Report - {start_date.strftime("%B %Y")}', 0)
+
+    # Attendance Table
+    doc.add_heading('Attendance Records', level=1)
+    records_by_date = {}
+
+    # Group records by date
+    for record in records:
+        date_obj = record['date']
+        date_str = date_obj.strftime('%B %d, %Y')
+        if date_str not in records_by_date:
+            records_by_date[date_str] = []
+        records_by_date[date_str].append(record)
+
+    # Write grouped records
+    for date_str in sorted(records_by_date):
+        doc.add_paragraph(date_str, style='Heading 2')
+
+        table = doc.add_table(rows=1, cols=3)
+        table.style = 'Light List Accent 1'
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = '#'
+        hdr_cells[1].text = 'Name'
+        hdr_cells[2].text = 'Time'
+
+        for idx, record in enumerate(records_by_date[date_str], 1):
+            row = table.add_row().cells
+            row[0].text = str(idx)
+            row[1].text = record['name']
+            row[2].text = record['date'].strftime('%I:%M %p')
+
+        doc.add_paragraph()
+
+    # Top Attendees
+    doc.add_heading('Top Attendees', level=1)
+    top_table = doc.add_table(rows=1, cols=2)
+    top_table.style = 'Light List Accent 2'
+    top_hdr = top_table.rows[0].cells
+    top_hdr[0].text = 'Name'
+    top_hdr[1].text = 'Attendance Count'
+    for attendee in top_attendees:
+        row = top_table.add_row().cells
+        row[0].text = str(attendee['_id'])
+        row[1].text = str(attendee['count'])
+
+    # Attendance Summary
+    doc.add_heading('Attendance Summary', level=1)
+    summary_table = doc.add_table(rows=1, cols=2)
+    summary_table.style = 'Light Grid Accent 3'
+    hdr = summary_table.rows[0].cells
+    hdr[0].text = 'Date'
+    hdr[1].text = 'Attendance Count'
+    summary_dates = []
+    summary_counts = []
+    for item in summary:
+        row = summary_table.add_row().cells
+        row[0].text = item['_id']
+        row[1].text = str(item['count'])
+        summary_dates.append(item['_id'])
+        summary_counts.append(item['count'])
+
+    # Chart for Attendance Summary
+    if summary_dates and summary_counts:
+        fig, ax = plt.subplots(figsize=(6, 3))
+        ax.plot(summary_dates, summary_counts, marker='o', color='skyblue')
+        ax.set_title('Attendance Summary')
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Count')
+        ax.tick_params(axis='x', rotation=45)
+        fig.tight_layout()
+
+        image_stream = io.BytesIO()
+        plt.savefig(image_stream, format='png')
+        image_stream.seek(0)
+        doc.add_picture(image_stream, width=Inches(6))
+        image_stream.close()
+        plt.close()
+
+    # Return document
+    doc_stream = io.BytesIO()
+    doc.save(doc_stream)
+    doc_stream.seek(0)
+    filename = f'attendance_{year}-{month:02d}.docx'
+    return send_file(doc_stream, as_attachment=True, download_name=filename)
 
 @app.route('/api/top_attendees', methods=['GET'])
 def get_top_attendees():

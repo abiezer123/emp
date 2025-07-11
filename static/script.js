@@ -16,14 +16,18 @@ let currentDeleteId = null; // Store the ID of the record to delete
 
 // Initialize filter date input to today and load records
 window.addEventListener('DOMContentLoaded', () => {
-    const todayISO = new Date().toISOString().slice(0, 10);
-    filterDateInput.value = todayISO;
+    const now = new Date();
+    const datetimeLocal = now.toISOString().slice(0, 16);
+    document.getElementById('date').value = datetimeLocal;
+
+    const today = now.toISOString().slice(0, 10);
+    document.getElementById('filter-date').value = today;
+
+    const downloadMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('download-month').value = downloadMonth;
+
     loadRecordsForFilterDate();
     updateUI();
-    // Set download-month to current month
-    const now = new Date();
-    const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM
-    document.getElementById('download-month').value = currentMonth;
 });
 
 function updateUI() {
