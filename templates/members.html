@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Members Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+        }
+
+        nav.navbar {
+            background-color: #2c3e50;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .navbar-links {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .navbar-links li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .navbar-links li a:hover,
+        .navbar-links li a.active {
+            color: #1abc9c;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .members-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .member-btn {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .member-btn:hover {
+            background-color: #16a085;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th,
+        td {
+            padding: 0.8rem;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #ecf0f1;
+            color: #333;
+        }
+
+        td.present {
+            color: green;
+            font-weight: bold;
+        }
+
+        td.absent {
+            color: red;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .members-container {
+                flex-direction: column;
+            }
+
+            .member-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">EmpireTrack</div>
+        <ul class="navbar-links">
+            <li><a href="/attendance">Dashboard</a></li>
+            <li><a href="/members" class="active">Members</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h2>Members</h2>
+        <input type="text" id="searchInput" placeholder="Search member..." />
+        <ol class="members-list-vertical" id="membersList">
+            {% for name in names %}
+            <li><button class="member-btn" onclick="openMemberModal('{{ name }}')">{{ name }}</button></li>
+            {% endfor %}
+        </ol>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modal-member-name"></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="modal-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+        #searchInput {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.6rem;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .members-list-vertical {
+            list-style: decimal inside;
+            margin: 0;
+            padding-left: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .member-btn {
+            background-color: #ffffff;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 80%;
+            text-align: left;
+        }
+
+
+        .member-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 99;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .modal-content th,
+        .modal-content td {
+            padding: 0.6rem;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .present {
+            color: green;
+            font-weight: bold;
+        }
+
+        .absent {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        function formatDatePretty(dateString) {
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function openMemberModal(name) {
+            document.getElementById('modal-member-name').textContent = `Attendance for ${name}`;
+            const modal = document.getElementById('memberModal');
+            const tbody = document.getElementById('modal-body');
+            tbody.innerHTML = '';
+
+            fetch(`/api/member_attendance/${encodeURIComponent(name)}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by latest first
+                    data.forEach((entry, i) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${formatDatePretty(entry.date)}</td>
+            <td class="${entry.present ? 'present' : 'absent'}">
+              ${entry.present ? '✔️ Present' : '❌ Absent'}
+            </td>
+          `;
+                        tbody.appendChild(row);
+                    });
+                    modal.style.display = 'flex';
+                });
+        }
+
+        function closeModal() {
+            document.getElementById('memberModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('memberModal');
+            if (event.target === modal) closeModal();
+        };
+
+        // Search bar filtering
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            const listItems = document.querySelectorAll('#membersList li');
+            listItems.forEach(li => {
+                const name = li.textContent.toLowerCase();
+                li.style.display = name.includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+
+
+
+    <script>
+        function loadAttendance(name) {
+            document.getElementById('member-name-title').innerText = `Attendance for ${name}`;
+            const table = document.getElementById('attendance-status');
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            fetch(`/api/member_attendance/${encodeURIComponent(name)}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach((entry, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.date}</td>
+            <td class="${entry.present ? 'present' : 'absent'}">
+              ${entry.present ? '✔️ Present' : '❌ Absent'}
+            </td>
+          `;
+                        tbody.appendChild(row);
+                    });
+                    table.style.display = 'table';
+                });
+        }
+    </script>
+
+</body>
+
+</html>

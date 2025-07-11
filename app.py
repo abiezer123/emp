@@ -340,5 +340,44 @@ def get_top_attendees():
 
 
 
+
+
+@app.route('/members')
+def members():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    names = attendance_collection.distinct('name')
+    return render_template('members.html', names=names)
+
+@app.route('/api/member_attendance/<name>', methods=['GET'])
+def get_member_attendance(name):
+    name = name.strip()
+    if not name:
+        return jsonify({'error': 'Name is required'}), 400
+
+    # Get all unique attendance dates from the database
+    all_dates_cursor = attendance_collection.find({}, {'date': 1})
+    all_dates = set()
+    for record in all_dates_cursor:
+        all_dates.add(record['date'].date())  # Extract only the date part
+
+    # Get all dates where the member is present
+    present_dates_cursor = attendance_collection.find({'name': name}, {'date': 1})
+    present_dates = set()
+    for record in present_dates_cursor:
+        present_dates.add(record['date'].date())
+
+    # Prepare the response: every date in the database, marked present or not
+    response = []
+    for date in sorted(all_dates):
+        response.append({
+            'date': date.isoformat(),
+            'present': date in present_dates
+        })
+
+    return jsonify(response)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
