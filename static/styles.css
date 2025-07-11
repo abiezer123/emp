@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f6f8;
+    background: linear-gradient(250deg, #3498db, white);
     color: #333;
     padding: 20px;
 }
@@ -17,7 +17,7 @@ main {
     background: white;
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 h2 {
@@ -184,7 +184,7 @@ hr {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #3498db, #8e44ad);
+    background: linear-gradient(135deg, #3498db, white);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
