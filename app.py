@@ -40,7 +40,7 @@ def index():
 def login():
     error = None
     if request.method == 'POST':
-        username = request.form.get('username')
+        username = request.form.get('username').strip()
         password = request.form.get('password')
 
         user = users_collection.find_one({'username': username})
