@@ -1,9 +1,3 @@
-// Tab switching
-const navItems = document.querySelectorAll('nav .nav-item');
-const sections = {
-    attendance: document.getElementById('attendance'),
-    dashboard: document.getElementById('dashboard'),
-};
 
 const timeframeSelect = document.getElementById('timeframe');
 const dateSelect = document.getElementById('dateSelect');
@@ -20,6 +14,13 @@ const suggestionsList = document.getElementById('suggestions');
 let attendanceChartInstance = null; // To hold the Chart.js instance
 let currentDeleteId = null; // Store the ID of the record to delete
 
+// Initialize filter date input to today and load records
+window.addEventListener('DOMContentLoaded', () => {
+    const todayISO = new Date().toISOString().slice(0, 10);
+    filterDateInput.value = todayISO;
+    loadRecordsForFilterDate();
+    updateUI();
+});
 
 function updateUI() {
     const timeframe = timeframeSelect.value;
@@ -48,8 +49,13 @@ function formatXAxisLabel(dateString, timeframe) {
     }
 }
 
-function updateAttendanceChart(summaryData, timeframe) {
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
+function updateAttendanceChart(summaryData) {
+    const chartCanvas = document.getElementById('attendanceChart');
+    if (!chartCanvas || chartCanvas.offsetParent === null) {
+        console.warn('Chart container is not visible or missing.');
+        return;
+    }
+    const ctx = chartCanvas.getContext('2d');
 
     if (attendanceChartInstance) {
         attendanceChartInstance.destroy();
@@ -57,7 +63,7 @@ function updateAttendanceChart(summaryData, timeframe) {
     }
 
     if (!summaryData || summaryData.length === 0) {
-        // clear canvas or show message if needed
+        // Optionally clear the canvas or show message
         return;
     }
 
@@ -119,115 +125,6 @@ function updateAttendanceChart(summaryData, timeframe) {
     });
 }
 
-// Keep other existing code like renderTopAttendees, renderAttendanceSummary...
-
-window.addEventListener('DOMContentLoaded', () => {
-    initializeDashboard();
-});
-
-
-// Update Chart with attendance data using Chart.js
-function updateAttendanceChart(summaryData) {
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
-    const timeframe = timeframeSelect.value;
-
-    if (!summaryData || summaryData.length === 0) {
-        // Clear chart or show "No data"
-        if (attendanceChartInstance) {
-            attendanceChartInstance.destroy();
-            attendanceChartInstance = null;
-        }
-        // Optional: Display message or blank
-        return;
-    }
-
-    // Prepare labels and data points
-    const labels = summaryData.map(item => formatXAxisLabel(item.date, timeframe));
-    const data = summaryData.map(item => item.count);
-
-    // If chart exists, destroy before creating new
-    if (attendanceChartInstance) {
-        attendanceChartInstance.destroy();
-    }
-
-    attendanceChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Number of Attendees',
-                data,
-                borderColor: 'rgba(52, 152, 219, 1)',
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.2,
-                pointRadius: 3,
-                pointHoverRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            interaction: {
-                mode: 'nearest',
-                intersect: false
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.parsed.y} attendees`
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    },
-                    ticks: {
-                        maxRotation: 90,
-                        minRotation: 45,
-                        autoSkip: true,
-                        maxTicksLimit: 20,
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Attendance Count'
-                    },
-                    suggestedMax: Math.max(...data) + 5
-                }
-            }
-        }
-    });
-}
-
-
-function initializeDashboard() {
-    updateUI(); // Call updateUI to set the initial state of the dashboard
-}
-
-navItems.forEach(item => {
-    item.addEventListener('click', () => {
-        navItems.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        const tab = item.getAttribute('data-tab');
-        for (const key in sections) {
-            if (key === tab) {
-                sections[key].classList.remove('hidden');
-                // If switching to dashboard, load dashboard data
-                if (key === 'dashboard') {
-                    initializeDashboard();
-                }
-            } else {
-                sections[key].classList.add('hidden');
-            }
-        }
-    });
-});
 
 // Attendance logic
 async function fetchAttendanceRecords(date) {
@@ -325,7 +222,7 @@ filterDateInput.addEventListener('change', () => {
 });
 
 function loadRecordsForFilterDate() {
-    const selectedDate = filterDateInput.value;
+    const selectedDate = filterDateInput.value;``
     if (selectedDate) {
         fetchAttendanceRecords(selectedDate);
     } else {
@@ -333,12 +230,7 @@ function loadRecordsForFilterDate() {
     }
 }
 
-// Initialize filter date input to today and load records
-window.addEventListener('DOMContentLoaded', () => {
-    const todayISO = new Date().toISOString().slice(0, 10);
-    filterDateInput.value = todayISO;
-    loadRecordsForFilterDate();
-});
+
 
 // Suggestions logic
 nameInput.addEventListener('input', async () => {
@@ -388,15 +280,6 @@ document.addEventListener('click', (event) => {
     }
 });
 
-// Mobile menu toggle
-const menuToggle = document.querySelector('.menu-toggle');
-menuToggle.addEventListener('click', () => {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('open');
-    const mainContent = document.querySelector('main');
-    mainContent.classList.toggle('fullwidth');
-});
-
 // Dashboard logic
 async function fetchData() {
     const timeframe = timeframeSelect.value;
@@ -425,6 +308,7 @@ async function fetchData() {
         const summaryResponse = await fetch(`/api/attendance_summary?timeframe=${timeframe}&date=${date}`);
         if (!summaryResponse.ok) throw new Error('Failed to fetch attendance summary');
         const summaryData = await summaryResponse.json();
+        console.log('Attendance summary data:', summaryData);
         renderAttendanceSummary(summaryData);
         updateAttendanceChart(summaryData);
     } catch (err) {
@@ -466,55 +350,11 @@ function renderAttendanceSummary(summary) {
     });
 }
 
-function updateAttendanceChart(summaryData) {
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
-
-    const labels = summaryData.map(item => item.date);
-    const data = summaryData.map(item => item.count);
-
-    // Check if the chart instance exists and destroy it
-    if (attendanceChartInstance) {
-        attendanceChartInstance.destroy(); // Destroy existing chart if it exists
-    }
-
-    // Create a new chart instance
-    attendanceChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Number of Attendees',
-                data: data,
-                borderColor: 'rgba(52, 152, 219, 1)',
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                borderWidth: 2,
-                fill: true,
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    suggestedMax: Math.max(...data) + 5 // Add some padding to the max value
-                }
-            }
-        }
-    });
-}
-
 // Format datetime string nicely
 function formatDateTime(dtString) {
     const date = new Date(dtString);
     return date.toLocaleString(); // Adjust the format as needed
 }
-
-// Initialize dashboard on load
-window.addEventListener('DOMContentLoaded', () => {
-    // Set initial values for dashboard controls and fetch data
-    initializeDashboard(); // This will set default date and call fetchData
-});
-
 
 document.getElementById('download-btn').addEventListener('click', async () => {
     const monthInput = document.getElementById('download-month').value;

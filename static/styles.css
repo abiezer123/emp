@@ -8,48 +8,15 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f6f8;
     color: #333;
-}
-
-.container {
-    display: flex;
-    height: 100vh;
-}
-
-.sidebar {
-    background-color: #2c3e50;
-    color: white;
-    width: 250px;
     padding: 20px;
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
-}
-
-.nav-item {
-    margin: 15px 0;
-    cursor: pointer;
-    padding: 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.nav-item:hover {
-    background-color: #34495e;
-}
-
-.nav-item.active {
-    background-color: #3498db;
 }
 
 main {
-    flex: 1;
-    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
     background: white;
-    border-top-left-radius: 15px;
-    border-bottom-left-radius: 15px;
+    padding: 20px;
+    border-radius: 15px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -66,12 +33,14 @@ form {
 }
 
 .suggestions-container {
-    position: relative; /* For absolute positioning of suggestions */
+    position: relative;
 }
 
 input[type="text"],
 input[type="datetime-local"],
-input[type="date"] {
+input[type="date"],
+input[type="month"],
+select {
     padding: 10px;
     font-size: 1rem;
     border: 1.5px solid #ccc;
@@ -79,9 +48,8 @@ input[type="date"] {
     transition: border-color 0.3s;
 }
 
-input[type="text"]:focus,
-input[type="datetime-local"]:focus,
-input[type="date"]:focus {
+input:focus,
+select:focus {
     border-color: #3498db;
     outline: none;
 }
@@ -107,6 +75,7 @@ table {
     background: white;
     border-radius: 8px;
     overflow: hidden;
+    margin-top: 1rem;
 }
 
 thead {
@@ -114,7 +83,8 @@ thead {
     color: white;
 }
 
-th, td {
+th,
+td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #e1e4e8;
@@ -126,78 +96,18 @@ tr:last-child td {
 
 .btn-delete {
     background-color: #e74c3c;
-    border: none;
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
+    border: none;
 }
 
 .btn-delete:hover {
     background-color: #c0392b;
 }
 
-/* Dashboard and Member placeholders */
-#dashboard {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    min-height: 250px;
-    color: #666;
-}
-
-.menu-toggle {
-    display: none;
-    background: #3498db;
-    color: black;
-    border: none;
-    padding: 10px 15px;
-    font-size: 18px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 0;
-        padding: 20px 0;
-        position: fixed; /* Keep sidebar off-screen */
-        z-index: 1000;
-        height: 100vh;
-        overflow-x: hidden;
-    }
-
-    .sidebar.open {
-        width: 200px;
-        padding: 20px;
-    }
-
-    .menu-toggle {
-        display: block;
-        background: none;
-        border: none;
-        color: #ecf0f1;
-        font-size: 1.8rem;
-        cursor: pointer;
-        align-self: flex-start; /* Align to the start of the flex container */
-        margin-bottom: 20px;
-        padding: 0 10px;
-    }
-
-
-    main {
-        border-radius: 0;
-        box-shadow: none;
-    }
-}
-
-/* Suggestions dropdown styles */
 .suggestions-list {
     list-style-type: none;
     padding: 0;
@@ -207,19 +117,17 @@ tr:last-child td {
     overflow-y: auto;
     position: absolute;
     background: white;
-    width: 100%; /* Full width of the input */
-    box-sizing: border-box; /* Include padding and border in width */
+    width: 100%;
     z-index: 1000;
-    border-radius: 0 0 5px 5px; /* Rounded corners at the bottom */
+    border-radius: 0 0 5px 5px;
 }
 
 .suggestions-list li {
-    padding: 12px; /* Increased padding for better touch target */
+    padding: 12px;
     cursor: pointer;
-    font-size: 1rem; /* Base font size */
+    font-size: 1rem;
 }
 
-/* Hover effect for suggestions */
 .suggestions-list li:hover {
     background-color: #f0f0f0;
 }
@@ -246,14 +154,4 @@ tr:last-child td {
 
 .hidden {
     display: none;
-}
-
-.login-container{
-    position: relative;
-}
-
-.login-container input,.login-container button{
-    width: 400px;
-    height: 40px;
-    position: center;
 }
