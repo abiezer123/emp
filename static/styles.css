@@ -243,65 +243,55 @@ hr {
 }
 
 
+/* Base Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-/* Navbar Base */
+body {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* --- NAVBAR STYLING --- */
 .navbar {
-    background-color: #1f2a40;
+    background-color: rgba(31, 42, 64, 0.85);
+    backdrop-filter: blur(12px);
     color: white;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    margin: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.8rem 2rem;
+    flex-wrap: wrap;
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Brand */
+/* Left side: logo + burger */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Logo */
 .navbar-brand {
     font-size: 1.5rem;
     font-weight: bold;
     color: #f1c40f;
-    letter-spacing: 1px;
 }
 
-/* Links */
-.navbar-links {
-    list-style: none;
-    display: flex;
-    gap: 1.5rem;
-}
-
-.navbar-links a {
-    color: #ecf0f1;
-    text-decoration: none;
-    font-weight: 500;
-    position: relative;
-    transition: color 0.3s ease;
-}
-
-.navbar-links a:hover,
-.navbar-links a.active {
-    color: #f1c40f;
-}
-
-.navbar-links a.active::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -6px;
-    width: 100%;
-    height: 2px;
-    background-color: #f1c40f;
-    border-radius: 2px;
-}
-
-/* Toggle for mobile */
+/* Burger toggle (hidden checkbox) */
 .nav-toggle {
     display: none;
 }
 
+/* Burger icon */
 .nav-toggle-label {
     display: none;
     flex-direction: column;
@@ -309,62 +299,60 @@ hr {
 }
 
 .nav-toggle-label span {
-    background: white;
-    height: 2px;
     width: 25px;
-    margin-bottom: 5px;
-    transition: all 0.3s ease;
+    height: 3px;
+    background-color: white;
+    margin: 4px 0;
+    border-radius: 2px;
 }
 
-/* Responsive */
+/* Links */
+.navbar-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+}
+
+.navbar-links li a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.navbar-links li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-links li a.active {
+    background-color: #f1c40f;
+    color: #1f2a40;
+}
+
+/* --- MOBILE STYLES --- */
 @media (max-width: 768px) {
-    .navbar-links {
-        position: absolute;
-        top: 60px;
-        right: 0;
-        background-color: #1f2a40;
-        flex-direction: column;
-        width: 100%;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.4s ease-in-out;
-    }
-
-    .navbar-links li {
-        margin: 1rem 0;
-        text-align: center;
-    }
-
-    .nav-toggle:checked+.nav-toggle-label+.navbar-links {
-        max-height: 300px;
-    }
-
     .nav-toggle-label {
         display: flex;
     }
-}
 
-.member-list {
-    list-style: none;
-    padding-left: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
-}
+    .navbar-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 1rem;
+        background-color: rgba(31, 42, 64, 0.95);
+        border-radius: 12px;
+        padding: 1rem;
+    }
 
-.member-list li a {
-    padding: 10px 15px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    display: block;
-    color: #2c3e50;
-    text-decoration: none;
-    transition: 0.2s ease;
-}
+    .nav-toggle:checked+.nav-toggle-label+.navbar-links {
+        display: flex;
+    }
 
-.member-list li a:hover {
-    background: #3498db;
-    color: white;
+    .navbar-links li {
+        margin: 0.5rem 0;
+        text-align: center;
+    }
 }
