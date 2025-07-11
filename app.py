@@ -10,6 +10,7 @@ from io import BytesIO
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from calendar import monthrange
 
 load_dotenv()  # Load .env file
 
@@ -126,7 +127,7 @@ def logout():
 
 @app.route('/api/attendance_summary', methods=['GET'])
 def get_attendance_summary():
-    timeframe = request.args.get('timeframe', 'monthly')  # Default to monthly
+    timeframe = request.args.get('timeframe', 'monthly')
     date_str = request.args.get('date')
     
     if not date_str:
@@ -134,43 +135,31 @@ def get_attendance_summary():
     try:
         if timeframe == 'monthly':
             year, month = map(int, date_str.split('-'))
+            last_day = monthrange(year, month)[1]
             start_date = datetime(year, month, 1)
-            end_date = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
+            end_date = datetime(year, month, last_day, 23, 59, 59)
         else:  # yearly
             year = int(date_str)
             start_date = datetime(year, 1, 1)
-            end_date = datetime(year + 1, 1, 1)
+            end_date = datetime(year, 12, 31, 23, 59, 59)
     except ValueError:
         return jsonify({'error': 'Invalid date format, expected YYYY-MM or YYYY'}), 400
-     # MongoDB aggregation pipeline
+
     pipeline = [
-        {
-            '$match': {
-                'date': {'$gte': start_date, '$lt': end_date}
-            }
-        },
-        {
-            '$group': {
-                '_id': { '$dateToString': { 'format': "%Y-%m-%d", 'date': "$date" } },
-                'count': {'$sum': 1}
-            }
-        },
-        {
-            '$sort': {'_id': 1}
-        }
+        { '$match': { 'date': { '$gte': start_date, '$lte': end_date } } },
+        { '$group': {
+            '_id': { '$dateToString': { 'format': '%Y-%m-%d', 'date': '$date' } },
+            'count': { '$sum': 1 }
+        }},
+        { '$sort': { '_id': 1 } }
     ]
+
     try:
         cursor = attendance_collection.aggregate(pipeline)
-        summary_data = []
-        for doc in cursor:
-            summary_data.append({
-                'date': doc['_id'],
-                'count': doc['count']
-            })
+        summary_data = [{ 'date': doc['_id'], 'count': doc['count'] } for doc in cursor]
         return jsonify(summary_data)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500  # Return error if aggregation fails
-
+        return jsonify({'error': str(e)}), 500
     
 @app.route('/api/download_attendance', methods=['GET'])
 def download_attendance():

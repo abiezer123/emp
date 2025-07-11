@@ -39,15 +39,19 @@ function updateUI() {
     fetchData();
 }
 
+dateSelect.addEventListener('change', () => {
+    fetchData();
+});
+
 function formatXAxisLabel(dateString, timeframe) {
     const date = new Date(dateString);
     if (timeframe === 'yearly') {
-        const options = { month: 'short', day: 'numeric' };
-        return date.toLocaleDateString(undefined, options);
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     } else {
-        return date.getDate().toString();
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
 }
+
 
 function updateAttendanceChart(summaryData) {
     const chartCanvas = document.getElementById('attendanceChart');
@@ -222,7 +226,7 @@ filterDateInput.addEventListener('change', () => {
 });
 
 function loadRecordsForFilterDate() {
-    const selectedDate = filterDateInput.value;``
+    const selectedDate = filterDateInput.value; ``
     if (selectedDate) {
         fetchAttendanceRecords(selectedDate);
     } else {
