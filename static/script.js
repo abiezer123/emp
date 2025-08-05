@@ -11,6 +11,7 @@ const dateInput = document.getElementById('date');
 const filterDateInput = document.getElementById('filter-date');
 const suggestionsList = document.getElementById('suggestions');
 
+
 let attendanceChartInstance = null; // To hold the Chart.js instance
 let currentDeleteId = null; // Store the ID of the record to delete
 
@@ -32,6 +33,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const downloadMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     document.getElementById('download-month').value = downloadMonth;
 
+    changeDateLabel();
     loadRecordsForFilterDate();
     updateUI();
 });
@@ -243,12 +245,14 @@ attendanceForm.addEventListener('submit', async (e) => {
 dateInput.addEventListener('change', () => {
     filterDateInput.value = dateInput.value.split("T")[0];
     loadRecordsForFilterDate();
+    changeDateLabel()
 })
 
 // When filter date picker changes, load records
 filterDateInput.addEventListener('change', () => {
     loadRecordsForFilterDate();
     dateInput.value = `${filterDateInput.value}T12:00`;
+    changeDateLabel()
 });
 
 function loadRecordsForFilterDate() {
@@ -463,4 +467,12 @@ function submitBulkEdit() {
         })
         .catch(err => console.error(err));
 
+}
+
+function changeDateLabel() {
+    const dateOnly = dateInput.value.split("T")[0];
+    const dateObj = new Date(dateOnly);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+
+    document.getElementById('dateForHeading').textContent = dateObj.toLocaleDateString('en-US', options);
 }
