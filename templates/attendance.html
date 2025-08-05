@@ -94,7 +94,6 @@
         <hr>
         <br><br><br><br>
 
-        <h2 class="dashboard-heading">Dashboard</h2>
         <div class="dashboard-controls">
             <label for="timeframe">View by:</label>
             <select id="timeframe" onchange="updateUI()">
@@ -104,24 +103,12 @@
             <label id="dateLabel" for="dateSelect">Select Month:</label>
             <input type="month" id="dateSelect" />
         </div>
-        <canvas id="attendanceChart" style="max-width: 900px; margin-top: 2rem;"></canvas>
+        <h2 class="dashboard-heading">Dashboard</h2>
+        <div class="dashboard-scroll">
+            <canvas id="attendanceChart" style="max-width: 900px; margin-top: 2rem;"></canvas>
+        </div>
 
         <hr>
-
-        <h3>Top Attendees</h3>
-        <table id="rankingTable">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Attendance Count</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <hr>
-
         <h3>Attendance Summary</h3>
         <table id="summaryTable">
             <thead>
@@ -132,6 +119,37 @@
             </thead>
             <tbody></tbody>
         </table>
+
+        <hr>
+
+        <div id="top-attendees-section" style="position: relative; width: 100%; max-width: 600px; margin: 0 auto;">
+            <h3 style="text-align: center; font-size: 28px; color: #e91e63; margin-bottom: 10px;">
+                ⭐ Top Attendees ⭐
+            </h3>
+
+            <!-- Cute Celebration GIF -->
+            <img src="https://gifsec.com/wp-content/uploads/2022/10/celebrate-gif-13.gif" alt="Congrats GIF"
+                style="width: 220px; display: block; margin: 10px auto;" />
+
+            <!-- Confetti Canvas (hidden from layout, positioned absolutely inside the div) -->
+            <canvas id="confetti-canvas"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+
+            <!-- Table -->
+            <table id="rankingTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Attendance Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data rows will go here -->
+                </tbody>
+            </table>
+        </div>
+
 
         <br>
         <hr>

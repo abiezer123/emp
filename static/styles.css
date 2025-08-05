@@ -9,6 +9,8 @@ body {
     background: linear-gradient(250deg, #3498db, white);
     color: #333;
     padding: 20px;
+    overflow-x: hidden;
+
 }
 
 main {
@@ -164,6 +166,25 @@ tr:last-child td {
 
 .dashboard-heading {
     margin-top: 50px;
+}
+
+.dashboard-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+    max-width: 100%;
+
+}
+
+.dashboard-scroll>* {
+    display: inline-block;
+
+
+}
+
+.dashboard-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 
 hr {
