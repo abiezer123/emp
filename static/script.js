@@ -16,8 +16,14 @@ let currentDeleteId = null; // Store the ID of the record to delete
 
 // Initialize filter date input to today and load records
 window.addEventListener('DOMContentLoaded', () => {
+    //for input date - 12:00pm at start and date today in philippines
     const now = new Date();
-    const datetimeLocal = now.toISOString().slice(0, 16);
+    const philTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+    const year = philTime.getFullYear();
+    const month = String(philTime.getMonth() + 1).padStart(2, '0');
+    const day = String(philTime.getDate()).padStart(2, '0');
+    const fixedTime = "12:00";
+    const datetimeLocal = `${year}-${month}-${day}T${fixedTime}`;
     document.getElementById('date').value = datetimeLocal;
 
     const today = now.toISOString().slice(0, 10);

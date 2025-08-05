@@ -215,15 +215,15 @@ hr {
 }
 
 .login-box input:focus {
-    border-color: #8e44ad;
+    border-color: #3498db;
     outline: none;
-    box-shadow: 0 0 5px #8e44ad;
+    box-shadow: 0 0 5px #3498db;
 }
 
 .login-box button {
     width: 100%;
     padding: 12px;
-    background: #8e44ad;
+    background: #3498db;
     color: white;
     border: none;
     border-radius: 10px;
@@ -233,7 +233,7 @@ hr {
 }
 
 .login-box button:hover {
-    background: #732d91;
+    background: #3498db;
 }
 
 .error-message {
