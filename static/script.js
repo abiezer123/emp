@@ -240,13 +240,19 @@ attendanceForm.addEventListener('submit', async (e) => {
     }
 });
 
+dateInput.addEventListener('change', () => {
+    filterDateInput.value = dateInput.value.split("T")[0];
+    loadRecordsForFilterDate();
+})
+
 // When filter date picker changes, load records
 filterDateInput.addEventListener('change', () => {
     loadRecordsForFilterDate();
+    dateInput.value = `${filterDateInput.value}T12:00`;
 });
 
 function loadRecordsForFilterDate() {
-    const selectedDate = filterDateInput.value; ``
+    const selectedDate = filterDateInput.value;
     if (selectedDate) {
         fetchAttendanceRecords(selectedDate);
     } else {
