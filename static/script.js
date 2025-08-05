@@ -429,7 +429,7 @@ function openBulkEditModal() {
     const defaultTime = "T12:00";
 
     // Set both datetime inputs in the modal to the selected date at 12:00 PM
-    document.getElementById('from-date').value = filterDate + defaultTime;
+    document.getElementById('from-date').value = filterDate;
     document.getElementById('to-date').value = filterDate + defaultTime;
 
 }
@@ -442,10 +442,10 @@ function closeBulkModal() {
 
 //submit edit date
 function submitBulkEdit() {
-    const fromDateRaw = document.getElementById('from-date').value;
+    const fromDate = document.getElementById('from-date').value;
     const toDateRaw = document.getElementById('to-date').value;
 
-    if (!fromDateRaw || !toDateRaw) {
+    if (!fromDate || !toDateRaw) {
         alert("Please fill in both dates.");
         return;
     }
@@ -455,7 +455,7 @@ function submitBulkEdit() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            from_date: fromDateRaw,
+            from_date: fromDate,
             to_date: toDateRaw
         })
     })
