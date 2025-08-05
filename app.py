@@ -13,8 +13,10 @@ from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from calendar import monthrange
 from bson.json_util import dumps
-import matplotlib.pyplot as plt
 import io
+import matplotlib
+matplotlib.use('Agg')  
+import matplotlib.pyplot as plt
 
 
 load_dotenv()  # Load .env file
