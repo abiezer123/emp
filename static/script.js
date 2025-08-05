@@ -463,7 +463,10 @@ function submitBulkEdit() {
         .then(data => {
             alert(data.message || "Updated!");
             closeBulkModal();
-            loadRecordsForFilterDate();
+            filterDateInput.value = toDateRaw.split("T")[0];
+            filterDateInput.dispatchEvent(new Event('change'));
+
+
         })
         .catch(err => console.error(err));
 
