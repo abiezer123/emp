@@ -27,9 +27,12 @@ db = client.attendance_db
 attendance_collection = db.attendance
 users_collection = db.users  # Assuming you have a users collection
 
-# Create a default admin user if it doesn't exist
-if users_collection.count_documents({'username': 'admin'}) == 0:
-    users_collection.insert_one({'username': 'admin', 'password': 'empire123'})
+def create_default_admin():
+    if users_collection.count_documents({'username': 'admin'}) == 0:
+        users_collection.insert_one({'username': 'admin', 'password': 'empire123'})
+
+create_default_admin()  # Call after app starts
+
 
 @app.route('/')
 def index():
