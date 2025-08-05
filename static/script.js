@@ -87,6 +87,8 @@ function updateAttendanceChart(summaryData) {
         return;
     }
 
+    chartCanvas.width = Math.max(summaryData.length * 60, 600);
+
     const labels = summaryData.map(item => formatXAxisLabel(item.date, timeframe));
     const data = summaryData.map(item => item.count);
 
