@@ -263,21 +263,21 @@ def download_attendance():
         summary_counts.append(item['count'])
 
     # Chart for Attendance Summary
-    if summary_dates and summary_counts:
-        fig, ax = plt.subplots(figsize=(6, 3))
-        ax.plot(summary_dates, summary_counts, marker='o', color='skyblue')
-        ax.set_title('Attendance Summary')
-        ax.set_xlabel('Date')
-        ax.set_ylabel('Count')
-        ax.tick_params(axis='x', rotation=45)
-        fig.tight_layout()
+    # if summary_dates and summary_counts:
+    #     fig, ax = plt.subplots(figsize=(6, 3))
+    #     ax.plot(summary_dates, summary_counts, marker='o', color='skyblue')
+    #     ax.set_title('Attendance Summary')
+    #     ax.set_xlabel('Date')
+    #     ax.set_ylabel('Count')
+    #     ax.tick_params(axis='x', rotation=45)
+    #     fig.tight_layout()
 
-        image_stream = io.BytesIO()
-        plt.savefig(image_stream, format='png')
-        image_stream.seek(0)
-        doc.add_picture(image_stream, width=Inches(6))
-        image_stream.close()
-        plt.close()
+    #     image_stream = io.BytesIO()
+    #     plt.savefig(image_stream, format='png')
+    #     image_stream.seek(0)
+    #     doc.add_picture(image_stream, width=Inches(6))
+    #     image_stream.close()
+    #     plt.close()
 
     # Return document
     doc_stream = io.BytesIO()
