@@ -403,3 +403,58 @@ document.getElementById('download-btn').addEventListener('click', async () => {
         alert('Failed to download attendance data.');
     }
 });
+
+
+//open edit modal
+function openBulkEditModal() {
+    const modal = document.getElementById("bulkEditModal");
+    modal.classList.remove("hidden");
+    const filterDate = document.getElementById('filter-date').value;
+
+    if (!filterDate) {
+        alert("Please select a date first.");
+        return;
+    }
+
+    const defaultTime = "T12:00";
+
+    // Set both datetime inputs in the modal to the selected date at 12:00 PM
+    document.getElementById('from-date').value = filterDate + defaultTime;
+    document.getElementById('to-date').value = filterDate + defaultTime;
+
+}
+
+//close edit modal
+function closeBulkModal() {
+    const modal = document.getElementById("bulkEditModal");
+    modal.classList.add("hidden");
+}
+
+//submit edit date
+function submitBulkEdit() {
+    const fromDateRaw = document.getElementById('from-date').value;
+    const toDateRaw = document.getElementById('to-date').value;
+
+    if (!fromDateRaw || !toDateRaw) {
+        alert("Please fill in both dates.");
+        return;
+    }
+
+    // Send to Flask API
+    fetch('/api/attendance/bulk-update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            from_date: fromDateRaw,
+            to_date: toDateRaw
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message || "Updated!");
+            closeBulkModal();
+            loadRecordsForFilterDate();
+        })
+        .catch(err => console.error(err));
+
+}

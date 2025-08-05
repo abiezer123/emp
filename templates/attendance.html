@@ -51,7 +51,33 @@
         <hr>
 
         <h3>Attendance List</h3>
-        <input type="date" id="filter-date" />
+
+        <div style="display: flex; align-items: center; gap: 100px;">
+            <input type="date" id="filter-date" />
+            <button type="button" style="background-color: #27ae60;;" onclick="openBulkEditModal()">Edit Date</button>
+        </div>
+
+        <!-- Modal for edit date -->
+        <div id="bulkEditModal" class="edit-modal-overlay hidden">
+            <div class="edit-modal-content">
+                <button class="edit-modal-close" onclick="closeBulkModal()">×</button>
+                <h2>Edit attendance</h2>
+
+                <label>Change all records from:</label>
+
+                <input type="datetime-local" id="from-date" />
+
+                <hr>
+                <label>Change them to:</label>
+                <input type="datetime-local" id="to-date" />
+
+                <div class="edit-modal-buttons">
+                    <button onclick="submitBulkEdit()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+
         <table id="attendance-table">
             <thead>
                 <tr>
@@ -63,6 +89,7 @@
             </thead>
             <tbody></tbody>
         </table>
+
 
         <hr>
         <br><br><br><br>

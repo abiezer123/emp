@@ -378,6 +378,33 @@ def get_member_attendance(name):
 
     return jsonify(response)
 
+@app.route('/api/attendance/bulk-update', methods=['PUT'])
+def bulk_update_attendance_dates():
+    data = request.get_json()
+    from_date_str = data.get('from_date')
+    to_date_str = data.get('to_date')
+
+    if not from_date_str or not to_date_str:
+        return jsonify({'error': 'Both from_date and to_date are required'}), 400
+
+    try:
+        from_date_obj = datetime.fromisoformat(from_date_str)
+        to_date_obj = datetime.fromisoformat(to_date_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    # Get all records on the same calendar day (regardless of time)
+    day_start = from_date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = from_date_obj.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    result = attendance_collection.update_many(
+        {'date': {'$gte': day_start, '$lte': day_end}},
+        {'$set': {'date': to_date_obj}}
+    )
+
+    return jsonify({'message': f'Updated {result.modified_count} record(s)'})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
