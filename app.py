@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import re
 from flask import send_file
@@ -61,22 +61,45 @@ def attendance():
 
 @app.route('/api/attendance', methods=['POST'])
 def add_attendance():
-    data = request.get_json()
-    name = data.get('name', '').strip()
-    date_str = data.get('date', '').strip()
-    if not name or not date_str:
-        return jsonify({'error': 'Name and date are required'}), 400
     try:
-        date = datetime.fromisoformat(date_str)
-    except ValueError:
-        return jsonify({'error': 'Invalid date format'}), 400
+        data = request.get_json(force=True)
+        name = data.get('name', '').strip()
+        date_str = data.get('date', '').strip()
 
-    record = {
-        'name': name,
-        'date': date
-    }
-    attendance_collection.insert_one(record)
-    return jsonify({'message': 'Attendance added successfully'})
+        if not name or not date_str:
+            return jsonify({'error': 'Name and date are required'}), 400
+
+        # Parse date from string
+        try:
+            date = datetime.fromisoformat(date_str)
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
+
+        # Normalize to day boundaries
+        day_start = datetime(date.year, date.month, date.day)
+        day_end = day_start + timedelta(days=1)
+
+        # Ensure uniqueness: same name + same day
+        existing = attendance_collection.find_one({
+            "name": name,
+            "date": {"$gte": day_start, "$lt": day_end}
+        })
+
+        if existing:
+            return jsonify({'error': f'{name} already has attendance for this date'}), 409
+
+        # Insert with Python datetime (Mongo stores as BSON Date)
+        record = {
+            'name': name,
+            'date': date
+        }
+        attendance_collection.insert_one(record)
+
+        return jsonify({'message': 'Attendance added successfully'}), 201
+
+    except Exception as e:
+        print("Error in add_attendance:", e)  # Debug log
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 
 @app.route('/api/attendance', methods=['GET'])

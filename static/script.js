@@ -216,7 +216,7 @@ document.getElementById('cancel-delete').addEventListener('click', () => {
     document.getElementById('delete-confirmation').classList.add('hidden'); // Hide modal
 });
 
-// On form submit, add attendance record
+//add name in attendance record
 attendanceForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = nameInput.value.trim();
@@ -232,7 +232,15 @@ attendanceForm.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name, date: datetime })
         });
-        if (!response.ok) throw new Error('Failed to add attendance');
+
+        if (!response.ok) {
+            if (response.status === 409) {
+                alert('Error: Attendance record already exists!');
+            } else {
+                alert('Error: ' + (result.error || 'Failed to add attendance'));
+            }
+            return;
+        };
 
         nameInput.value = '';
         filterDateInput.value = datetime.split('T')[0];
