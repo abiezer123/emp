@@ -235,7 +235,7 @@ attendanceForm.addEventListener('submit', async (e) => {
 
         if (!response.ok) {
             if (response.status === 409) {
-                alert('Error: Attendance record already exists!');
+                alert(' This name already exists in attendance.');
             } else {
                 alert('Error: ' + (result.error || 'Failed to add attendance'));
             }
