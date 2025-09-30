@@ -173,17 +173,33 @@ function renderAttendanceTable(records) {
         attendanceTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No records found for this date.</td></tr>';
         return;
     }
+
+    // Sort so visitors go last
+    records.sort((a, b) => {
+        if (a.is_visitor && !b.is_visitor) return -1; // visitor first
+        if (!a.is_visitor && b.is_visitor) return 1;
+        return 0;
+    });
+
     attendanceTableBody.innerHTML = '';
     records.forEach((r, index) => {
         const tr = document.createElement('tr');
+
+        // Highlight if visitor
+        if (r.is_visitor) {
+            tr.style.backgroundColor = '#ffeeba'; // light yellow highlight
+            tr.style.fontWeight = 'bold';
+        }
+
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${r.name}</td>
+            <td>${r.name}${r.is_visitor ? ' (Visitor)' : ''}</td>
             <td>${formatDateTime(r.date)}</td>
             <td><button class="btn-delete" data-id="${r._id}">Delete</button></td>
         `;
         attendanceTableBody.appendChild(tr);
     });
+
     attachDeleteHandlers();
 }
 
@@ -221,16 +237,23 @@ attendanceForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = nameInput.value.trim();
     const datetime = dateInput.value;
+    const isVisitor = document.getElementById('visitor').checked;
+
     if (!name || !datetime) {
         alert('Please fill in the name and date.');
         return;
     }
 
     try {
+
         const response = await fetch('/api/attendance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, date: datetime })
+            body: JSON.stringify({
+                name: name,
+                date: datetime,
+                is_visitor: isVisitor
+            })
         });
 
         if (!response.ok) {
@@ -246,6 +269,8 @@ attendanceForm.addEventListener('submit', async (e) => {
         filterDateInput.value = datetime.split('T')[0];
         loadRecordsForFilterDate();
         nameInput.focus();
+        document.getElementById('visitor').checked = false;
+
     } catch (err) {
         alert('Error adding attendance entry.');
         console.error(err);

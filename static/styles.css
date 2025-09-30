@@ -8,19 +8,33 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(250deg, #3498db, white);
     color: #333;
-    padding: 20px;
+    padding: 0px;
     overflow-x: hidden;
 
 }
 
 main {
-    max-width: 1000px;
-    margin: auto;
+    border-radius: 10px;
+    margin: 0px auto;
+    max-width: 1400px;
     background: white;
     padding: 20px 10px;
-    border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
 }
+
+#attendance-form button {
+
+    width: 350px;
+    height: 45px;
+}
+
+
+#date {
+    width: 350px;
+    height: 45px;
+}
+
 
 h2 {
     margin-top: 0;
@@ -65,7 +79,9 @@ button {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+
 }
+
 
 button:hover {
     background-color: #2980b9;
@@ -279,16 +295,24 @@ body {
     backdrop-filter: blur(12px);
     color: white;
     padding: 1rem 2rem;
-    border-radius: 20px;
-    margin: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+
     position: sticky;
+    /* or fixed if you want it always visible */
     top: 0;
+    left: 0;
+    width: 100%;
+    /* stretch full width */
+    margin: 0;
+    /* remove space around */
+    border-radius: 0;
+    /* no rounded corners */
     z-index: 1000;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    height: 80px;
 }
 
 /* Left side: logo + burger */
@@ -352,6 +376,9 @@ body {
 
 /* --- MOBILE STYLES --- */
 @media (max-width: 768px) {
+
+
+
     .nav-toggle-label {
         display: flex;
     }
@@ -374,6 +401,35 @@ body {
         margin: 0.5rem 0;
         text-align: center;
     }
+
+    #attendance-form button {
+        display: block;
+        margin: 20px auto;
+        width: 90%;
+        height: 45px;
+    }
+
+
+    #date {
+        width: 97%;
+        height: 45px;
+    }
+
+    #name {
+        width: 70%;
+        height: 45px;
+    }
+
+    main {
+        border-radius: 10px;
+        margin: 10px 10px;
+        max-width: 1400px;
+        background: white;
+        padding: 20px 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+    }
+
 }
 
 .edit-modal-content {

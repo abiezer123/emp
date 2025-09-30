@@ -59,13 +59,15 @@ def attendance():
         return redirect(url_for('login'))
     return render_template('attendance.html')
 
+# i want to add visitor here
 @app.route('/api/attendance', methods=['POST'])
 def add_attendance():
     try:
         data = request.get_json(force=True)
         name = data.get('name', '').strip()
         date_str = data.get('date', '').strip()
-
+        is_visitor = bool(data.get('is_visitor', False))
+        
         if not name or not date_str:
             return jsonify({'error': 'Name and date are required'}), 400
 
@@ -91,7 +93,8 @@ def add_attendance():
         # Insert with Python datetime (Mongo stores as BSON Date)
         record = {
             'name': name,
-            'date': date
+            'date': date,
+            'is_visitor': is_visitor
         }
         attendance_collection.insert_one(record)
 
@@ -121,7 +124,8 @@ def get_attendance():
         records.append({
             '_id': str(doc['_id']),
             'name': doc['name'],
-            'date': doc['date'].isoformat()
+            'date': doc['date'].isoformat(),
+            'is_visitor': doc.get('is_visitor', False)
         })
     return jsonify({'records': records})
 

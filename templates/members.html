@@ -109,7 +109,7 @@
 
             <!-- Navigation links -->
             <ul class="navbar-links">
-                <li><a href="/attendance" class="{{ 'active' if request.path == '/attendance' else '' }}">Dashboard</a>
+                <li><a href="/attendance" class="{{ 'active' if request.path == '/attendance' else '' }}">Home</a>
                 </li>
                 <li><a href="/members" class="{{ 'active' if request.path == '/members' else '' }}">Members</a></li>
                 <li><a href="/logout">Logout</a></li>
@@ -133,19 +133,99 @@
     <div class="modal" id="memberModal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h3 id="modal-member-name"></h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="modal-body"></tbody>
-            </table>
+
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <img id="modal-member-image" src="{{ url_for('static', filename='images/user.png') }}" alt="Profile"
+                    class="profile-img" />
+                <h3 id="modal-member-name"></h3>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab(event, 'attendanceTab')">Attendance</button>
+                <button class="tab-btn" onclick="openTab(event, 'profileTab')">Information</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="attendanceTab" class="tab-content active">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-body"></tbody>
+                </table>
+            </div>
+
+            <div id="profileTab" class="tab-content">
+                <!-- Profile Information (Read Only) -->
+                <div id="profileView">
+
+                    <p><strong>Age:</strong> <span id="profileAge">---</span></p>
+                    <p><strong>Birthdate:</strong> <span id="profileBirthdate">---</span></p>
+                    <p><strong>Date Baptized:</strong> <span id="profileBaptistDate">---</span></p>
+                    <p><strong>Place of Baptism:</strong> <span id="profileBaptismPlace">---</span></p>
+                    <p><strong>Witnesses in Baptism:</strong> <span id="profileWitnesses">---</span></p>
+                    <p><strong>Father's Name:</strong> <span id="profileFather">---</span></p>
+                    <p><strong>Mother's Name:</strong> <span id="profileMother">---</span></p>
+                    <p><strong>Contact Number:</strong> <span id="profileContact">---</span></p>
+                    <p><strong>Email:</strong> <span id="profileEmail">---</span></p>
+                    <p><strong>Facebook:</strong> <span id="profileFacebook">---</span></p>
+                    <p><strong>Home Address:</strong> <span id="profileAddress">---</span></p>
+
+                    <button id="editProfileBtn" class="edit-btn">Edit Profile</button>
+                </div>
+
+                <!-- Profile Edit Form (Hidden by Default) -->
+                <form id="editProfileForm" style="display: none;">
+                    <label>Profile Picture</label>
+                    <input type="file" id="profileImageInput" accept="image/*" />
+
+                    <label>Full Name</label>
+                    <input type="text" id="editName" placeholder="Enter full name" />
+
+                    <label>Birthdate</label>
+                    <input type="date" id="editBirthdate" />
+
+                    <label>Date Baptized</label>
+                    <input type="date" id="editBaptistDate" />
+
+                    <label>Place of Baptism</label>
+                    <input type="text" id="editBaptismPlace" placeholder="Enter place of baptism" />
+
+                    <label>Witnesses in Baptism</label>
+                    <input type="text" id="editWitnesses" placeholder="Enter witnesses" />
+
+                    <label>Father's Name</label>
+                    <input type="text" id="editFather" placeholder="Enter father's name" />
+
+                    <label>Mother's Name</label>
+                    <input type="text" id="editMother" placeholder="Enter mother's name" />
+
+                    <label>Contact Number</label>
+                    <input type="text" id="editContact" placeholder="Enter contact number" />
+
+                    <label>Email</label>
+                    <input type="email" id="editEmail" placeholder="Enter email" />
+
+                    <label>Facebook</label>
+                    <input type="text" id="editFacebook" placeholder="Enter Facebook profile link" />
+
+                    <label>Home Address</label>
+                    <input type="text" id="editAddress" placeholder="Enter home address" />
+
+                    <button type="submit" class="save-btn">Save Changes</button>
+                    <button type="button" id="cancelEditBtn" class="cancel-btn">Cancel</button>
+                </form>
+            </div>
+
         </div>
     </div>
+
 
     <style>
         #searchInput {
@@ -206,6 +286,45 @@
             position: relative;
         }
 
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            /* spacing between image & name */
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            /* prevent shrinking */
+        }
+
+        .profile-header h3 {
+            font-size: 25px;
+            /* larger font for name */
+            font-weight: 700;
+            /* bold name */
+            margin: 0;
+            /* remove default margin */
+        }
+
+        .profile-img {
+            width: 140px !important;
+            /* fixed width */
+            height: 140px !important;
+            /* fixed height for perfect circle */
+            border-radius: 50% !important;
+            /* circle */
+            object-fit: cover !important;
+            /* cover entire circle */
+            border: 3px solid #007bff !important;
+            /* fixed border color */
+            pointer-events: none !important;
+            /* prevent dragging/clicking */
+            user-select: none !important;
+            /* prevent selection */
+            flex-shrink: 0;
+            /* prevent shrinking */
+        }
+
+
         .close-btn {
             position: absolute;
             top: 0.5rem;
@@ -236,6 +355,38 @@
             color: red;
             font-weight: bold;
         }
+
+
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            background: #f1f1f1;
+            color: black;
+            border: none;
+            outline: none;
+        }
+
+        .tab-btn.active {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 
     <script>
@@ -246,7 +397,7 @@
         }
 
         function openMemberModal(name) {
-            document.getElementById('modal-member-name').textContent = `Attendance for ${name}`;
+            document.getElementById('modal-member-name').textContent = `${name}`;
             const modal = document.getElementById('memberModal');
             const tbody = document.getElementById('modal-body');
             tbody.innerHTML = '';
@@ -288,6 +439,68 @@
                 li.style.display = name.includes(query) ? '' : 'none';
             });
         });
+
+
+        function openTab(evt, tabId) {
+            // Hide all tabs
+            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+
+            // Show clicked tab
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // // Preview uploaded image
+        // document.getElementById("profileImage").addEventListener("change", function () {
+        //     const file = this.files[0];
+        //     if (file) {
+        //         const reader = new FileReader();
+        //         reader.onload = function (e) {
+        //             const preview = document.getElementById("previewImage");
+        //             preview.src = e.target.result;
+        //             preview.style.display = "block";
+        //         };
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
+
+
+
+        //change from profile view to edit 
+
+        document.getElementById("editProfileBtn").addEventListener("click", function () {
+            document.getElementById("profileView").style.display = "none";
+            document.getElementById("editProfileForm").style.display = "block";
+        });
+
+        document.getElementById("cancelEditBtn").addEventListener("click", function () {
+            document.getElementById("editProfileForm").style.display = "none";
+            document.getElementById("profileView").style.display = "block";
+        });
+
+        document.getElementById("editProfileForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Example: Update displayed profile info
+            document.getElementById("profileName").textContent = document.getElementById("editName").value;
+            document.getElementById("profileBirthdate").textContent = document.getElementById("editBirthdate").value;
+            document.getElementById("profileBaptistDate").textContent = document.getElementById("editBaptistDate").value;
+            document.getElementById("profileBaptismPlace").textContent = document.getElementById("editBaptismPlace").value;
+            document.getElementById("profileWitnesses").textContent = document.getElementById("editWitnesses").value;
+            document.getElementById("profileFather").textContent = document.getElementById("editFather").value;
+            document.getElementById("profileMother").textContent = document.getElementById("editMother").value;
+            document.getElementById("profileContact").textContent = document.getElementById("editContact").value;
+            document.getElementById("profileEmail").textContent = document.getElementById("editEmail").value;
+            document.getElementById("profileFacebook").textContent = document.getElementById("editFacebook").value;
+            document.getElementById("profileAddress").textContent = document.getElementById("editAddress").value;
+
+            // Switch back to view mode
+            document.getElementById("editProfileForm").style.display = "none";
+            document.getElementById("profileView").style.display = "block";
+        });
+
+
     </script>
 
 

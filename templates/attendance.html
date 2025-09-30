@@ -26,7 +26,7 @@
 
             <!-- Navigation links -->
             <ul class="navbar-links">
-                <li><a href="/attendance" class="{{ 'active' if request.path == '/attendance' else '' }}">Dashboard</a>
+                <li><a href="/attendance" class="{{ 'active' if request.path == '/attendance' else '' }}">Home</a>
                 </li>
                 <li><a href="/members" class="{{ 'active' if request.path == '/members' else '' }}">Members</a></li>
                 <li><a href="/logout">Logout</a></li>
@@ -39,11 +39,15 @@
 
     <main>
         <h2>Attendance</h2>
+        <br>
         <form id="attendance-form" autocomplete="off">
             <div class="suggestions-container">
                 <input type="text" id="name" placeholder="Enter name" required />
                 <ul id="suggestions" class="suggestions-list hidden"></ul>
+                <input type="checkbox" id="visitor" name="is_visitor" value="visitor">
+                <label for="visitor">Visitor</label><br>
             </div>
+
             <input type="datetime-local" id="date" required />
             <button type="submit">Submit</button>
         </form>
