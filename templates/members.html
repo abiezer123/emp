@@ -119,15 +119,49 @@
 
     </header>
 
+
+
+
+
     <main>
-        <h2>Members</h2>
-        <input type="text" id="searchInput" placeholder="Search member..." />
-        <ol class="members-list-vertical" id="membersList">
-            {% for name in names %}
-            <li><button class="member-btn" onclick="openMemberModal('{{ name }}')">{{ name }}</button></li>
-            {% endfor %}
-        </ol>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'attendeesTab')">Attendees</button>
+            <button class="tab-btn" onclick="openTab(event, 'membersTab')">Members</button>
+        </div>
+
+        <!-- Attendees Tab -->
+        <div id="attendeesTab" class="tab-content active">
+            <h2>Attendees</h2>
+            <input type="text" id="searchAttendee" placeholder="Search attendee..." />
+            <ol class="members-list-vertical" id="attendeesList">
+                {% for name in attendees %}
+                <li>
+                    <button class="member-btn" onclick="openMemberModal('{{ name }}')">
+                        {{ name }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        <!-- Members Tab -->
+        <div id="membersTab" class="tab-content">
+            <h2>Members</h2>
+            <input type="text" id="searchInput" placeholder="Search member..." />
+            <ol class="members-list-vertical" id="membersList">
+                {% for member in members %}
+                <li>
+                    <button class="member-btn" onclick="openMemberModal('{{ member }}')">
+                        {{ member }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+
     </main>
+
 
     <!-- Modal -->
     <div class="modal" id="memberModal">
@@ -181,7 +215,11 @@
                 </div>
 
                 <!-- Profile Edit Form (Hidden by Default) -->
+                <!-- Profile Edit Form (Hidden by Default) -->
                 <form id="editProfileForm" style="display: none;">
+                    <!-- Hidden field to keep track of original member name -->
+                    <input type="hidden" id="originalName" />
+
                     <label>Profile Picture</label>
                     <input type="file" id="profileImageInput" accept="image/*" />
 
@@ -483,7 +521,7 @@
             e.preventDefault();
 
             // Example: Update displayed profile info
-            document.getElementById("profileName").textContent = document.getElementById("editName").value;
+            document.getElementById("modal-member-name").textContent = document.getElementById("editName").value;
             document.getElementById("profileBirthdate").textContent = document.getElementById("editBirthdate").value;
             document.getElementById("profileBaptistDate").textContent = document.getElementById("editBaptistDate").value;
             document.getElementById("profileBaptismPlace").textContent = document.getElementById("editBaptismPlace").value;

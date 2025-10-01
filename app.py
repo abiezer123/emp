@@ -14,7 +14,12 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from calendar import monthrange
 from bson.json_util import dumps
 import io
-
+from collections import Counter
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from datetime import date, datetime
+from pymongo import UpdateOne
 
 load_dotenv()  # Load .env file
 
@@ -25,7 +30,14 @@ MONGO_URI = os.getenv('MONGO_URI')
 client = MongoClient(MONGO_URI)
 db = client.attendance_db
 attendance_collection = db.attendance
-users_collection = db.users  # Assuming you have a users collection
+users_collection = db.users  # Assuming you have a users collectionz
+members_collection = db.members
+
+
+cloudinary.config( 
+  cloud_name = "dwtixju79", 
+  api_key = "836289374764364", 
+  api_secret = "wWPaBCiM928AH2AczGjoJGG-Mxk")
 
 def init_admin():
     if users_collection.count_documents({'username': 'admin'}) == 0:
@@ -351,17 +363,53 @@ def get_top_attendees():
 
     return jsonify(top_attendees)
 
-
-
-
-
 @app.route('/members')
 def members():
     if 'username' not in session:
         return redirect(url_for('login'))
-    
-    names = attendance_collection.distinct('name')
-    return render_template('members.html', names=names)
+
+    # --- Step 1: Attendees Tab ---
+    attendees = attendance_collection.distinct('name')
+    attendees.sort()
+
+    # --- Step 2: Find names with ≥2 occurrences in attendance ---
+    pipeline = [
+        {"$group": {"_id": "$name", "count": {"$sum": 1}}},
+        {"$match": {"count": {"$gte": 2}}}
+    ]
+    member_docs = list(attendance_collection.aggregate(pipeline))
+    member_names = [doc["_id"] for doc in member_docs]
+
+    # --- Step 3: Insert only new names into members ---
+    bulk_ops = []
+    for name in member_names:
+        bulk_ops.append(
+            UpdateOne(
+                {"name": name},  # filter by name
+                {"$setOnInsert": {  # insert only if it does not exist
+                    "name": name,
+                    "birthdate": None,
+                    "date_baptized": None,
+                    "place_baptism": "",
+                    "witnesses": "",
+                    "father": "",
+                    "mother": "",
+                    "contact": "",
+                    "email": "",
+                    "facebook": "",
+                    "address": "",
+                    "image_url": ""
+                }},
+                upsert=True
+            )
+        )
+    if bulk_ops:
+        members_collection.bulk_write(bulk_ops)
+
+    # --- Step 4: Fetch members for display ---
+    members = sorted([doc["name"] for doc in members_collection.find({}, {"_id": 0, "name": 1})])
+
+    return render_template('members.html', attendees=attendees, members=members)
 
 @app.route('/api/member_attendance/<name>', methods=['GET'])
 def get_member_attendance(name):
@@ -417,6 +465,79 @@ def bulk_update_attendance_dates():
 
     return jsonify({'message': f'Updated {result.modified_count} record(s)'})
 
+# Helper to calculate age
+def calculate_age(birthdate_str):
+    if not birthdate_str:
+        return None
+    try:
+        birthdate = datetime.strptime(birthdate_str, "%Y-%m-%d").date()
+        today = date.today()
+        return today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    except:
+        return None
+
+# --------------------------
+# GET member info
+@app.route('/api/members/<name>', methods=['GET'])
+def get_member(name):
+    member = members_collection.find_one({"name": name}, {"_id": 0})
+    if not member:
+        return jsonify({"error": "Member not found"}), 404
+
+    member["age"] = calculate_age(member.get("birthdate"))
+    return jsonify(member)
+
+@app.route("/api/members/update", methods=["POST"])
+def update_member():
+    data = request.get_json()
+    if not data or "originalName" not in data:
+        return jsonify({"error": "Missing member name"}), 400
+
+    original_name = data.pop("originalName")  # remove from dict to avoid overwriting
+    try:
+        result = members_collection.update_one(
+            {"name": original_name},
+            {"$set": data},
+            upsert=False
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"error": "Member not found"}), 404
+
+        # Fetch updated member
+        updated_member = members_collection.find_one({"name": data.get("name", original_name)}, {"_id": 0})
+        updated_member["age"] = calculate_age(updated_member.get("birthdate"))
+
+        return jsonify({"success": True, "member": updated_member})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# --------------------------
+# POST upload profile image
+@app.route("/upload_image", methods=["POST"])
+def upload_image():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
+
+    try:
+        upload_result = cloudinary.uploader.upload(file)
+        image_url = upload_result.get("secure_url")
+
+        # Update member image using originalName
+        name = request.form.get("name")
+        if name and image_url:
+            members_collection.update_one(
+                {"name": name},
+                {"$set": {"image_url": image_url}},
+                upsert=False
+            )
+
+        return jsonify({"url": image_url})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':

@@ -36,6 +36,7 @@ window.addEventListener('DOMContentLoaded', () => {
     changeDateLabel();
     loadRecordsForFilterDate();
     updateUI();
+    initMemberModal()
 });
 
 function updateUI() {
@@ -160,6 +161,150 @@ async function fetchAttendanceRecords(date) {
         attendanceTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#e74c3c;">Error loading records</td></tr>';
         console.error(err);
     }
+}
+// --- Open Member Modal ---
+async function openMemberModal(name) {
+    try {
+        const res = await fetch(`/api/members/${encodeURIComponent(name)}`);
+        const data = await res.json();
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        // Fill modal display
+        fillProfileData(data);
+
+        // Fill edit form fields
+        document.getElementById("originalName").value = data.name || "";
+        document.getElementById("editName").value = data.name || "";
+        document.getElementById("editBirthdate").value = data.birthdate || "";
+        document.getElementById("editBaptistDate").value = data.date_baptized || "";
+        document.getElementById("editBaptismPlace").value = data.place_baptism || "";
+        document.getElementById("editWitnesses").value = data.witnesses || "";
+        document.getElementById("editFather").value = data.father || "";
+        document.getElementById("editMother").value = data.mother || "";
+        document.getElementById("editContact").value = data.contact || "";
+        document.getElementById("editEmail").value = data.email || "";
+        document.getElementById("editFacebook").value = data.facebook || "";
+        document.getElementById("editAddress").value = data.address || "";
+
+        document.getElementById("memberModal").classList.add("show");
+    } catch (err) {
+        console.error(err);
+        alert("Failed to load member info.");
+    }
+}
+
+// --- Fill Modal Display ---
+function fillProfileData(data) {
+    document.getElementById('modal-member-name').textContent = data.name || "";
+    document.getElementById('profileAge').textContent = data.age || "";
+    document.getElementById('profileBirthdate').textContent = data.birthdate || "";
+    document.getElementById('profileAddress').textContent = data.address || "";
+    document.getElementById('profileBaptistDate').textContent = data.date_baptized || "";
+    document.getElementById('profileBaptismPlace').textContent = data.place_baptism || "";
+    document.getElementById('profileWitnesses').textContent = data.witnesses || "";
+    document.getElementById('profileFather').textContent = data.father || "";
+    document.getElementById('profileMother').textContent = data.mother || "";
+    document.getElementById('profileContact').textContent = data.contact || "";
+    document.getElementById('profileEmail').textContent = data.email || "";
+    document.getElementById('profileFacebook').textContent = data.facebook || "";
+    if (data.image_url) {
+        document.getElementById("modal-member-image").src = data.image_url;
+    }
+}
+
+
+function initMemberModal() {
+    const editBtn = document.getElementById("editProfileBtn");
+    const cancelBtn = document.getElementById("cancelEditBtn");
+    const editForm = document.getElementById("editProfileForm");
+    const imageInput = document.getElementById("profileImageInput");
+
+    if (!editBtn || !cancelBtn || !editForm || !imageInput) return; // avoid errors
+
+    // --- Edit / Cancel ---
+    editBtn.addEventListener("click", () => {
+        document.getElementById("profileView").style.display = "none";
+        editForm.style.display = "block";
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        editForm.style.display = "none";
+        document.getElementById("profileView").style.display = "block";
+    });
+
+    // --- Save Changes ---
+    editForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            originalName: document.getElementById("originalName").value.trim(),
+            name: document.getElementById("editName").value.trim(),
+            birthdate: document.getElementById("editBirthdate").value,
+            date_baptized: document.getElementById("editBaptistDate").value,
+            place_baptism: document.getElementById("editBaptismPlace").value,
+            witnesses: document.getElementById("editWitnesses").value,
+            father: document.getElementById("editFather").value,
+            mother: document.getElementById("editMother").value,
+            contact: document.getElementById("editContact").value,
+            email: document.getElementById("editEmail").value,
+            facebook: document.getElementById("editFacebook").value,
+            address: document.getElementById("editAddress").value
+        };
+
+        try {
+            const res = await fetch("/api/members/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+
+            if (result.success && result.member) {
+                alert("Profile updated successfully!");
+                fillProfileData(result.member);
+
+                // Update edit form fields
+                Object.keys(result.member).forEach(key => {
+                    const el = document.getElementById("edit" + key.charAt(0).toUpperCase() + key.slice(1));
+                    if (el) el.value = result.member[key];
+                });
+
+                document.getElementById("originalName").value = result.member.name || "";
+                editForm.style.display = "none";
+                document.getElementById("profileView").style.display = "block";
+            } else {
+                alert("Update failed: " + (result.error || "Unknown error"));
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error saving profile.");
+        }
+    });
+
+    // --- Upload Profile Picture ---
+    imageInput.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("name", document.getElementById("originalName").value);
+
+        try {
+            const res = await fetch("/upload_image", { method: "POST", body: formData });
+            const result = await res.json();
+            if (result.url) document.getElementById("modal-member-image").src = result.url;
+            else alert("Upload failed");
+        } catch (err) {
+            console.error(err);
+            alert("Error uploading image.");
+        }
+    });
 }
 
 function formatPrettyDate(dateStr) {
@@ -512,5 +657,8 @@ function changeDateLabel() {
     const dateObj = new Date(dateOnly);
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
 
-    document.getElementById('dateForHeading').textContent = dateObj.toLocaleDateString('en-US', options);
+    const headingEl = document.getElementById('dateForHeading');
+    if (headingEl) {
+        headingEl.textContent = dateObj.toLocaleDateString('en-US', options);
+    }
 }
