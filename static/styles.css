@@ -6,16 +6,76 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(250deg, #3498db, white);
+    background: linear-gradient(87deg, #3498db, white);
     color: #333;
     padding: 0px;
     overflow-x: hidden;
 
 }
 
-main {
+/* Container for the switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 25px;
+}
+
+/* Hide the default checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider (track) */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+/* The thumb on the slider */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+/* Change slider color when checkbox is checked */
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+/* Move the thumb when checkbox is checked */
+input:checked+.slider:before {
+    transform: translateX(12px);
+}
+
+/* Rounded corners for the switch */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+
+
+.partition {
     border-radius: 10px;
-    margin: 0px auto;
+    margin: 20px 20px;
     max-width: 1400px;
     background: white;
     padding: 20px 10px;
@@ -45,7 +105,7 @@ form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 20px;
+
 }
 
 .suggestions-container {
@@ -88,7 +148,7 @@ button:hover {
 }
 
 #name {
-    width: 240px;
+    width: 250px;
 
 }
 
@@ -181,7 +241,7 @@ tr:last-child td {
 
 
 .dashboard-heading {
-    margin-top: 50px;
+    margin-top: 20px;
 }
 
 .dashboard-scroll {
@@ -291,7 +351,7 @@ body {
 
 /* --- NAVBAR STYLING --- */
 .navbar {
-    background-color: rgba(31, 42, 64, 0.85);
+    background-color: rgba(5, 39, 102, 0.85);
     backdrop-filter: blur(12px);
     color: white;
     padding: 1rem 2rem;
@@ -416,20 +476,30 @@ body {
     }
 
     #name {
-        width: 70%;
+        width: 62%;
         height: 45px;
     }
 
-    main {
+
+    .partition {
         border-radius: 10px;
-        margin: 10px 10px;
+        margin: 30px 25px;
         max-width: 1400px;
         background: white;
-        padding: 20px 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        padding: 10px 20px;
+        box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
 
     }
 
+    #members_partition {
+        border-radius: 10px;
+        margin: 10px 0px;
+        max-width: 1400px;
+        background: white;
+        padding: 10px 20px;
+        box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
+
+    }
 }
 
 .edit-modal-content {

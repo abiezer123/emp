@@ -332,7 +332,7 @@ function renderAttendanceTable(records) {
 
         // Highlight if visitor
         if (r.is_visitor) {
-            tr.style.backgroundColor = '#ffeeba'; // light yellow highlight
+            tr.style.backgroundColor = '#bff1bfff';
             tr.style.fontWeight = 'bold';
         }
 
