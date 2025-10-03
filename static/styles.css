@@ -351,35 +351,21 @@ body {
 
 /* --- NAVBAR STYLING --- */
 .navbar {
-    background-color: rgba(5, 39, 102, 0.85);
+    background-color: rgba(27, 45, 80, 0.918);
     backdrop-filter: blur(12px);
     color: white;
     padding: 1rem 2rem;
+    border-radius: 20px;
+    margin: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* keep this for brand left, links right */
     flex-wrap: wrap;
-
     position: sticky;
-    /* or fixed if you want it always visible */
     top: 0;
-    left: 0;
-    width: 100%;
-    /* stretch full width */
-    margin: 0;
-    /* remove space around */
-    border-radius: 0;
-    /* no rounded corners */
     z-index: 1000;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    height: 80px;
-}
-
-/* Left side: logo + burger */
-.nav-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Logo */
@@ -437,7 +423,12 @@ body {
 /* --- MOBILE STYLES --- */
 @media (max-width: 768px) {
 
-
+    .navbar {
+        flex-direction: row;
+        align-items: center;
+        padding: 1rem;
+        position: relative;
+    }
 
     .nav-toggle-label {
         display: flex;
