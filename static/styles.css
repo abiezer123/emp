@@ -71,17 +71,39 @@ input:checked+.slider:before {
     border-radius: 50%;
 }
 
+main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 20px 50px;
+
+}
+
+
+.left-column {
+    flex: 0 0 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 48%;
+}
+
+.right-column {
+    flex: 0 0 63%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 48%;
+}
 
 
 .partition {
-    border-radius: 10px;
-    margin: 20px 20px;
-    max-width: 1400px;
     background: white;
-    padding: 20px 10px;
+    padding: 20px;
+    border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-
 }
+
 
 #attendance-form button {
 
@@ -423,42 +445,58 @@ body {
 /* --- MOBILE STYLES --- */
 @media (max-width: 768px) {
 
-    .navbar {
-        flex-direction: row;
-        align-items: center;
-        padding: 1rem;
-        position: relative;
-    }
 
-    .nav-toggle-label {
+    /* make main a vertical flex container */
+    main {
         display: flex;
-    }
-
-    .navbar-links {
-        display: none;
         flex-direction: column;
-        width: 100%;
-        margin-top: 1rem;
-        background-color: rgba(31, 42, 64, 0.95);
-        border-radius: 12px;
-        padding: 1rem;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 16px;
     }
 
-    .nav-toggle:checked+.nav-toggle-label+.navbar-links {
-        display: flex;
+    /* remove the wrapper from layout so its children act like main's children */
+    .left-column,
+    .right-column {
+        display: contents;
     }
 
-    .navbar-links li {
-        margin: 0.5rem 0;
-        text-align: center;
+    /* partitions styling on mobile */
+    .partition {
+        width: 92%;
+        margin: 8px auto;
+        padding: 12px 16px;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.12);
+        box-sizing: border-box;
     }
 
-    #attendance-form button {
-        display: block;
-        margin: 20px auto;
-        width: 90%;
-        height: 45px;
+    /* now order applies because partitions are direct children of main */
+    #attendance_partition {
+        order: 1;
     }
+
+    #partition-attendance-table {
+        order: 2;
+    }
+
+    /* make sure this id exactly matches your HTML */
+    #dashboard-controls-partition {
+        order: 3;
+    }
+
+    #attendance-summary-partition {
+        order: 4;
+    }
+
+    #top-attendees-partition {
+        order: 5;
+    }
+
+    #download-partition {
+        order: 6;
+    }
+
 
 
     #date {
@@ -470,28 +508,53 @@ body {
         width: 62%;
         height: 45px;
     }
-
-
-    .partition {
-        border-radius: 10px;
-        margin: 30px 25px;
-        max-width: 1400px;
-        background: white;
-        padding: 10px 20px;
-        box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
-
-    }
-
-    #members_partition {
-        border-radius: 10px;
-        margin: 10px 0px;
-        max-width: 1400px;
-        background: white;
-        padding: 10px 20px;
-        box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
-
-    }
 }
+
+
+
+.nav-toggle-label {
+    display: flex;
+}
+
+.navbar-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+    background-color: rgba(31, 42, 64, 0.95);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.nav-toggle:checked+.nav-toggle-label+.navbar-links {
+    display: flex;
+}
+
+.navbar-links li {
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+#attendance-form button {
+    display: block;
+    margin: 20px auto;
+    width: 90%;
+    height: 45px;
+}
+
+
+
+
+#members_partition {
+    border-radius: 10px;
+    margin: 10px 0px;
+    max-width: 1400px;
+    background: white;
+    padding: 10px 20px;
+    box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
+
+}
+
 
 .edit-modal-content {
     background: white;
