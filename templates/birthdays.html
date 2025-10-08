@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Celebrants</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fdfbfb, #ebedee);
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .month-section {
+            background: linear-gradient(90deg, #ffffff, #f7f9fc);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #3498db;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .month-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #3498db;
+            position: relative;
+        }
+
+        .month-title::after {
+            content: "🎉";
+            position: absolute;
+            right: -2rem;
+            top: -0.3rem;
+            font-size: 2rem;
+        }
+
+        .members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .member-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #f0f8ff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .member-row:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .member-name {
+            font-weight: 700;
+            color: #2c3e50;
+            flex: 2;
+        }
+
+        .member-age {
+            font-weight: 600;
+            color: #16a085;
+            flex: 1;
+            text-align: right;
+        }
+
+        .member-next-age {
+            font-weight: 600;
+            color: #e67e22;
+            flex: 1;
+            text-align: right;
+        }
+
+        .today-birthday {
+            background: #ffe6e6 !important;
+            border-left: 4px solid #e74c3c;
+        }
+
+        @media (max-width: 600px) {
+            .member-row {
+                flex-direction: column;
+                gap: 4px;
+                text-align: left;
+            }
+
+            .member-age,
+            .member-next-age {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<header>
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="navbar-brand">Empire Church</div>
+        </div>
+
+        <!-- Burger icon toggle -->
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
+        <!-- Navigation links -->
+        <ul class="navbar-links">
+            <li><a href="/attendance" class="{{ 'active' if request.path == '/attendance' else '' }}">Home</a>
+            </li>
+            <li><a href="/members" class="{{ 'active' if request.path == '/members' else '' }}">Members</a></li>
+            <li><a href="/birthdays" class="{{ 'active' if request.path == '/birthdays' else '' }}">Birthdays</a>
+            </li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+
+</header>
+
+
+<body>
+    <main>
+        <h2>🎂 Birthday Celebrants 🎈</h2>
+
+        {% set today = namespace(day=now.day, month=now.month) %}
+        {% for month, members_in_month in birthdays.items() %}
+        <div class="month-section">
+            <div class="month-title">{{ month }}</div>
+            <div class="members-list">
+                {% for member in members_in_month %}
+                {% set is_today = (member.birth_day == today.day and member.birth_month == today.month) %}
+                <div class="member-row {% if is_today %}today-birthday{% endif %}">
+                    <div class="member-name">{{ member.full_name }} {% if is_today %}🎉{% endif %}</div>
+                    <div class="member-age">Current Age: {{ member.current_age }}</div>
+                    <div class="member-next-age">After Birthday: {{ member.next_age }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </main>
+</body>
+
+</html>

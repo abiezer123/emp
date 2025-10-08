@@ -564,5 +564,38 @@ def upload_image():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/birthdays')
+def birthdays():
+    members = list(members_collection.find())  # or wherever your members are stored
+
+    months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+
+    birthdays_dict = {month: [] for month in months}
+
+    for m in members:
+        if m.get('birthdate'):
+            bdate = m['birthdate']  # 'YYYY-MM-DD' string
+            b = date.fromisoformat(bdate)
+            month_name = months[b.month - 1]
+            today = date.today()
+            current_age = today.year - b.year
+            # If birthday hasn't occurred yet this year
+            if (today.month, today.day) < (b.month, b.day):
+                current_age -= 1
+            next_age = current_age + 1
+            birthdays_dict[month_name].append({
+                'full_name': m.get('full_name') or m.get('name'),
+                'current_age': current_age,
+                'next_age': next_age
+            })
+
+    # Remove months with no birthdays
+    birthdays_dict = {k: v for k, v in birthdays_dict.items() if v}
+
+    return render_template("birthdays.html", birthdays=birthdays_dict, now=datetime.now())
+
 if __name__ == '__main__':
     app.run(debug=True)
