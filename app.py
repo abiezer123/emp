@@ -435,9 +435,14 @@ def members():
         members_collection.bulk_write(bulk_ops)
 
     # --- Step 4: Fetch members for display ---
-    members_cursor = members_collection.find({}, {"name": 1})
+    members_cursor = members_collection.find({}, {"name": 1, "full_name": 1, "image_url": 1})
     members = [
-        {"id": str(doc["_id"]), "name": doc["name"]}
+        {
+            "id": str(doc["_id"]),
+            "name": doc.get("name", ""),
+            "full_name": doc.get("full_name", ""),
+            "image_url": doc.get("image_url", "")
+        }
         for doc in members_cursor
     ]
 
@@ -498,53 +503,43 @@ def get_member(member_id):
 
 @app.route("/api/members/update", methods=["POST"])
 def update_member():
-    data = request.get_json()
-    print("Received data:", data)  # 👈 check what frontend sends
-    member_id = data.get("id")
-
-    if not member_id:
-        return jsonify({"success": False, "error": "Missing member ID"}), 400
-
     try:
+        data = request.get_json()
+        member_id = data.get("id")
+
+        if not member_id:
+            return jsonify({"success": False, "error": "Missing member ID"}), 400
+
         update_fields = {
-            "name": data.get("name"),
-            "birthdate": data.get("birthdate"),
-            "date_baptized": data.get("date_baptized"),
-            "place_baptism": data.get("place_baptism"),
-            "witnesses": data.get("witnesses"),
-            "father": data.get("father"),
-            "mother": data.get("mother"),
-            "contact": data.get("contact"),
-            "email": data.get("email"),
-            "facebook": data.get("facebook"),
-            "address": data.get("address")
+            "full_name": data.get("full_name", "").strip(),
+            "name": data.get("name", "").strip(),
+            "birthdate": data.get("birthdate", "").strip(),
+            "date_baptized": data.get("date_baptized", "").strip(),
+            "place_baptism": data.get("place_baptism", "").strip(),
+            "witnesses": data.get("witnesses", "").strip(),
+            "father": data.get("father", "").strip(),
+            "mother": data.get("mother", "").strip(),
+            "contact": data.get("contact", "").strip(),
+            "email": data.get("email", "").strip(),
+            "facebook": data.get("facebook", "").strip(),
+            "address": data.get("address", "").strip()
         }
 
-        update_fields = {k: v for k, v in update_fields.items() if v is not None}
-        print("Update fields:", update_fields)  # 👈 check what will be saved
+        # Remove empty strings (to avoid overwriting with blank)
+        update_fields = {k: v for k, v in update_fields.items() if v != ""}
 
         result = members_collection.update_one(
             {"_id": ObjectId(member_id)},
             {"$set": update_fields}
         )
 
-        print("Matched count:", result.matched_count)  # 👈 should be 1 if found
-
         if result.matched_count == 0:
             return jsonify({"success": False, "error": "Member not found"}), 404
 
-        updated_member = members_collection.find_one({"_id": ObjectId(member_id)})
-        updated_member["_id"] = str(updated_member["_id"])
-        updated_member["age"] = calculate_age(updated_member.get("birthdate"))
-
-        return jsonify({"success": True, "member": updated_member})
-
+        return jsonify({"success": True, "message": "Member updated successfully!"})
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500
-
-
+    
 @app.route("/upload_image", methods=["POST"])
 def upload_image():
     if "file" not in request.files:
