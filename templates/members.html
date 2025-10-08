@@ -34,17 +34,6 @@
             margin-bottom: 2rem;
         }
 
-        .member-btn {
-            background-color: #1abc9c;
-            color: white;
-            border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-        }
-
         .member-btn:hover {
             background-color: #16a085;
         }
@@ -417,19 +406,6 @@
             margin: 0;
         }
 
-        .member-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 10px;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
 
         .member-btn:hover {
             background: #f2f2f2;
@@ -470,6 +446,39 @@
             transition: background-color 0.3s;
             width: 80%;
             text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .members-list-vertical li button.member-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 90%;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid #298dcf;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            /* the blue bar on the left */
+        }
+
+        .members-list-vertical li button.member-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
         }
 
 
@@ -613,6 +622,19 @@
                 items.sort((a, b) => a.textContent.localeCompare(b.textContent));
                 list.innerHTML = '';
                 items.forEach(item => list.appendChild(item));
+            }
+
+            const searchAttendeeInput = document.getElementById('searchAttendee');
+            const attendeesList = document.getElementById('attendeesList');
+
+            if (searchAttendeeInput && attendeesList) {
+                searchAttendeeInput.addEventListener('input', function () {
+                    const query = this.value.toLowerCase();
+                    Array.from(attendeesList.querySelectorAll('li')).forEach(li => {
+                        const name = li.textContent.toLowerCase();
+                        li.style.display = name.includes(query) ? '' : 'none';
+                    });
+                });
             }
 
             // 🔍 Search bar filtering
