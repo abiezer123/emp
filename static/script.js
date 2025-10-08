@@ -199,6 +199,7 @@ async function openMemberModal(name) {
 
 // --- Fill Modal Display ---
 function fillProfileData(data) {
+    document.getElementById("memberId").value = data._id;
     document.getElementById('modal-member-name').textContent = data.name || "";
     document.getElementById('profileAge').textContent = data.age || "";
     document.getElementById('profileBirthdate').textContent = data.birthdate || "";
@@ -241,7 +242,7 @@ function initMemberModal() {
         e.preventDefault();
 
         const payload = {
-            originalName: document.getElementById("originalName").value.trim(),
+            id: document.getElementById("memberId").value, // Hidden input field for _id
             name: document.getElementById("editName").value.trim(),
             birthdate: document.getElementById("editBirthdate").value,
             date_baptized: document.getElementById("editBaptistDate").value,
@@ -264,22 +265,23 @@ function initMemberModal() {
 
             const result = await res.json();
 
-            if (result.success && result.member) {
+            if (result.success) {
                 alert("Profile updated successfully!");
-                fillProfileData(result.member);
 
-                // Update edit form fields
-                Object.keys(result.member).forEach(key => {
-                    const el = document.getElementById("edit" + key.charAt(0).toUpperCase() + key.slice(1));
-                    if (el) el.value = result.member[key];
-                });
+                // Re-fetch updated data from DB before showing modal
+                const updatedRes = await fetch(`/api/members/${payload.id}`);
+                const updatedData = await updatedRes.json();
 
-                document.getElementById("originalName").value = result.member.name || "";
+                if (!updatedData.error) {
+                    fillProfileData(updatedData);
+                }
+
                 editForm.style.display = "none";
                 document.getElementById("profileView").style.display = "block";
             } else {
                 alert("Update failed: " + (result.error || "Unknown error"));
             }
+
         } catch (err) {
             console.error(err);
             alert("Error saving profile.");

@@ -363,6 +363,34 @@ def get_top_attendees():
 
     return jsonify(top_attendees)
 
+@app.route('/api/attendance/bulk-update', methods=['PUT'])
+def bulk_update_attendance_dates():
+    data = request.get_json()
+    from_date_str = data.get('from_date')
+    to_date_str = data.get('to_date')
+
+    if not from_date_str or not to_date_str:
+        return jsonify({'error': 'Both from_date and to_date are required'}), 400
+
+    try:
+        from_date_obj = datetime.fromisoformat(from_date_str)
+        to_date_obj = datetime.fromisoformat(to_date_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    # Get all records on the same calendar day (regardless of time)
+    day_start = from_date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = from_date_obj.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    result = attendance_collection.update_many(
+        {'date': {'$gte': day_start, '$lte': day_end}},
+        {'$set': {'date': to_date_obj}}
+    )
+
+    return jsonify({'message': f'Updated {result.modified_count} record(s)'})
+
+
+
 @app.route('/members')
 def members():
     if 'username' not in session:
@@ -407,7 +435,12 @@ def members():
         members_collection.bulk_write(bulk_ops)
 
     # --- Step 4: Fetch members for display ---
-    members = sorted([doc["name"] for doc in members_collection.find({}, {"_id": 0, "name": 1})])
+    members_cursor = members_collection.find({}, {"name": 1})
+    members = [
+        {"id": str(doc["_id"]), "name": doc["name"]}
+        for doc in members_cursor
+    ]
+
 
     return render_template('members.html', attendees=attendees, members=members)
 
@@ -439,32 +472,6 @@ def get_member_attendance(name):
 
     return jsonify(response)
 
-@app.route('/api/attendance/bulk-update', methods=['PUT'])
-def bulk_update_attendance_dates():
-    data = request.get_json()
-    from_date_str = data.get('from_date')
-    to_date_str = data.get('to_date')
-
-    if not from_date_str or not to_date_str:
-        return jsonify({'error': 'Both from_date and to_date are required'}), 400
-
-    try:
-        from_date_obj = datetime.fromisoformat(from_date_str)
-        to_date_obj = datetime.fromisoformat(to_date_str)
-    except ValueError:
-        return jsonify({'error': 'Invalid date format'}), 400
-
-    # Get all records on the same calendar day (regardless of time)
-    day_start = from_date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
-    day_end = from_date_obj.replace(hour=23, minute=59, second=59, microsecond=999999)
-
-    result = attendance_collection.update_many(
-        {'date': {'$gte': day_start, '$lte': day_end}},
-        {'$set': {'date': to_date_obj}}
-    )
-
-    return jsonify({'message': f'Updated {result.modified_count} record(s)'})
-
 # Helper to calculate age
 def calculate_age(birthdate_str):
     if not birthdate_str:
@@ -476,45 +483,68 @@ def calculate_age(birthdate_str):
     except:
         return None
 
-# --------------------------
-# GET member info
-@app.route('/api/members/<name>', methods=['GET'])
-def get_member(name):
-    member = members_collection.find_one({"name": name}, {"_id": 0})
-    if not member:
-        return jsonify({"error": "Member not found"}), 404
+@app.route('/api/members/<member_id>', methods=['GET'])
+def get_member(member_id):
+    try:
+        member = members_collection.find_one({"_id": ObjectId(member_id)})
+        if not member:
+            return jsonify({"error": "Member not found"}), 404
 
-    member["age"] = calculate_age(member.get("birthdate"))
-    return jsonify(member)
+        member["_id"] = str(member["_id"])  # Convert ObjectId to string for JSON
+        member["age"] = calculate_age(member.get("birthdate"))
+        return jsonify(member)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/members/update", methods=["POST"])
 def update_member():
     data = request.get_json()
-    if not data or "originalName" not in data:
-        return jsonify({"error": "Missing member name"}), 400
+    print("Received data:", data)  # 👈 check what frontend sends
+    member_id = data.get("id")
 
-    original_name = data.pop("originalName")  # remove from dict to avoid overwriting
+    if not member_id:
+        return jsonify({"success": False, "error": "Missing member ID"}), 400
+
     try:
+        update_fields = {
+            "name": data.get("name"),
+            "birthdate": data.get("birthdate"),
+            "date_baptized": data.get("date_baptized"),
+            "place_baptism": data.get("place_baptism"),
+            "witnesses": data.get("witnesses"),
+            "father": data.get("father"),
+            "mother": data.get("mother"),
+            "contact": data.get("contact"),
+            "email": data.get("email"),
+            "facebook": data.get("facebook"),
+            "address": data.get("address")
+        }
+
+        update_fields = {k: v for k, v in update_fields.items() if v is not None}
+        print("Update fields:", update_fields)  # 👈 check what will be saved
+
         result = members_collection.update_one(
-            {"name": original_name},
-            {"$set": data},
-            upsert=False
+            {"_id": ObjectId(member_id)},
+            {"$set": update_fields}
         )
 
-        if result.matched_count == 0:
-            return jsonify({"error": "Member not found"}), 404
+        print("Matched count:", result.matched_count)  # 👈 should be 1 if found
 
-        # Fetch updated member
-        updated_member = members_collection.find_one({"name": data.get("name", original_name)}, {"_id": 0})
+        if result.matched_count == 0:
+            return jsonify({"success": False, "error": "Member not found"}), 404
+
+        updated_member = members_collection.find_one({"_id": ObjectId(member_id)})
+        updated_member["_id"] = str(updated_member["_id"])
         updated_member["age"] = calculate_age(updated_member.get("birthdate"))
 
         return jsonify({"success": True, "member": updated_member})
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
-# --------------------------
-# POST upload profile image
 @app.route("/upload_image", methods=["POST"])
 def upload_image():
     if "file" not in request.files:
@@ -526,11 +556,10 @@ def upload_image():
         upload_result = cloudinary.uploader.upload(file)
         image_url = upload_result.get("secure_url")
 
-        # Update member image using originalName
-        name = request.form.get("name")
-        if name and image_url:
+        member_id = request.form.get("id")
+        if member_id and image_url:
             members_collection.update_one(
-                {"name": name},
+                {"_id": ObjectId(member_id)},
                 {"$set": {"image_url": image_url}},
                 upsert=False
             )

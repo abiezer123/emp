@@ -153,8 +153,8 @@
                 <ol class="members-list-vertical" id="membersList">
                     {% for member in members %}
                     <li>
-                        <button class="member-btn" onclick="openMemberModal('{{ member }}')">
-                            {{ member }}
+                        <button class="member-btn" onclick="openMemberModal('{{ member.name }}', '{{ member.id }}')">
+                            {{ member.name }}
                         </button>
                     </li>
                     {% endfor %}
@@ -219,6 +219,8 @@
                 <!-- Profile Edit Form (Hidden by Default) -->
                 <form id="editProfileForm" style="display: none;">
                     <!-- Hidden field to keep track of original member name -->
+                    <input type="hidden" id="memberId" />
+
                     <input type="hidden" id="originalName" />
 
                     <label>Profile Picture</label>
@@ -429,85 +431,147 @@
     </style>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 🔤 Sort Members Alphabetically
+            const list = document.getElementById('membersList');
+            if (list) {
+                const items = Array.from(list.querySelectorAll('li'));
+                items.sort((a, b) => a.textContent.localeCompare(b.textContent));
+                list.innerHTML = '';
+                items.forEach(item => list.appendChild(item));
+            }
+
+            // 🔍 Search Filter
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const query = this.value.toLowerCase();
+                    const listItems = document.querySelectorAll('#membersList li');
+                    listItems.forEach(li => {
+                        const name = li.textContent.toLowerCase();
+                        li.style.display = name.includes(query) ? '' : 'none';
+                    });
+                });
+            }
+        });
+
+        // 📅 Format date to "Month day, Year"
         function formatDatePretty(dateString) {
+            if (!dateString) return "---";
             const date = new Date(dateString);
+            if (isNaN(date)) return "---";
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             return date.toLocaleDateString('en-US', options);
         }
 
-        function openMemberModal(name) {
-            document.getElementById('modal-member-name').textContent = `${name}`;
+        // 🧮 Compute age
+        function calculateAge(birthdate) {
+            if (!birthdate) return "---";
+            const birth = new Date(birthdate);
+            if (isNaN(birth)) return "---";
+
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // 🧑 Open Member Modal
+        function openMemberModal(name, memberId) {
+            document.getElementById('modal-member-name').textContent = name;
+            document.getElementById('memberId').value = memberId;
+
             const modal = document.getElementById('memberModal');
             const tbody = document.getElementById('modal-body');
             tbody.innerHTML = '';
 
+            // 📖 Load Attendance Records
             fetch(`/api/member_attendance/${encodeURIComponent(name)}`)
                 .then(res => res.json())
                 .then(data => {
-                    data.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by latest first
+                    data.sort((a, b) => new Date(b.date) - new Date(a.date));
                     data.forEach((entry, i) => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${formatDatePretty(entry.date)}</td>
-            <td class="${entry.present ? 'present' : 'absent'}">
-              ${entry.present ? '✔️ Present' : '❌ Absent'}
-            </td>
-          `;
+                        <td>${i + 1}</td>
+                        <td>${formatDatePretty(entry.date)}</td>
+                        <td class="${entry.present ? 'present' : 'absent'}">
+                            ${entry.present ? '✔️ Present' : '❌ Absent'}
+                        </td>`;
                         tbody.appendChild(row);
                     });
-                    modal.style.display = 'flex';
                 });
+
+            // 👤 Load Full Member Info
+            fetch(`/api/members/${memberId}`)
+                .then(res => res.json())
+                .then(member => {
+                    // 🖼️ Profile Image
+                    const profileImg = document.getElementById('modal-member-image');
+                    if (member.image_url && member.image_url.trim() !== "") {
+                        profileImg.src = member.image_url;
+                    } else {
+                        profileImg.src = "{{ url_for('static', filename='images/user.png') }}";
+                    }
+                    profileImg.onerror = () => {
+                        profileImg.src = "{{ url_for('static', filename='images/user.png') }}";
+                    };
+
+                    // 🧮 Age and Dates
+                    document.getElementById('profileAge').textContent = calculateAge(member.birthdate);
+                    document.getElementById('profileBirthdate').textContent = formatDatePretty(member.birthdate);
+                    document.getElementById('profileBaptistDate').textContent = formatDatePretty(member.date_baptized);
+
+                    // 📄 Profile Info
+                    document.getElementById('profileBaptismPlace').textContent = member.place_baptism || '---';
+                    document.getElementById('profileWitnesses').textContent = member.witnesses || '---';
+                    document.getElementById('profileFather').textContent = member.father || '---';
+                    document.getElementById('profileMother').textContent = member.mother || '---';
+                    document.getElementById('profileContact').textContent = member.contact || '---';
+                    document.getElementById('profileEmail').textContent = member.email || '---';
+                    document.getElementById('profileFacebook').textContent = member.facebook || '---';
+                    document.getElementById('profileAddress').textContent = member.address || '---';
+
+                    // ✏️ Fill Edit Form
+                    document.getElementById('editName').value = member.name || '';
+                    document.getElementById('editBirthdate').value = member.birthdate || '';
+                    document.getElementById('editBaptistDate').value = member.date_baptized || '';
+                    document.getElementById('editBaptismPlace').value = member.place_baptism || '';
+                    document.getElementById('editWitnesses').value = member.witnesses || '';
+                    document.getElementById('editFather').value = member.father || '';
+                    document.getElementById('editMother').value = member.mother || '';
+                    document.getElementById('editContact').value = member.contact || '';
+                    document.getElementById('editEmail').value = member.email || '';
+                    document.getElementById('editFacebook').value = member.facebook || '';
+                    document.getElementById('editAddress').value = member.address || '';
+                });
+
+            modal.style.display = 'flex';
         }
 
+        // ❌ Close Modal
         function closeModal() {
             document.getElementById('memberModal').style.display = 'none';
         }
 
+        // 🔘 Close on Outside Click
         window.onclick = function (event) {
             const modal = document.getElementById('memberModal');
             if (event.target === modal) closeModal();
         };
 
-        // Search bar filtering
-        document.getElementById('searchInput').addEventListener('input', function () {
-            const query = this.value.toLowerCase();
-            const listItems = document.querySelectorAll('#membersList li');
-            listItems.forEach(li => {
-                const name = li.textContent.toLowerCase();
-                li.style.display = name.includes(query) ? '' : 'none';
-            });
-        });
-
-
+        // 📑 Tabs
         function openTab(evt, tabId) {
-            // Hide all tabs
             document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
             document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-
-            // Show clicked tab
             document.getElementById(tabId).classList.add("active");
             evt.currentTarget.classList.add("active");
         }
 
-        // // Preview uploaded image
-        // document.getElementById("profileImage").addEventListener("change", function () {
-        //     const file = this.files[0];
-        //     if (file) {
-        //         const reader = new FileReader();
-        //         reader.onload = function (e) {
-        //             const preview = document.getElementById("previewImage");
-        //             preview.src = e.target.result;
-        //             preview.style.display = "block";
-        //         };
-        //         reader.readAsDataURL(file);
-        //     }
-        // });
-
-
-
-        //change from profile view to edit 
-
+        // ✏️ Edit Mode Toggle
         document.getElementById("editProfileBtn").addEventListener("click", function () {
             document.getElementById("profileView").style.display = "none";
             document.getElementById("editProfileForm").style.display = "block";
@@ -518,32 +582,81 @@
             document.getElementById("profileView").style.display = "block";
         });
 
+        // 💾 Save Edited Profile
         document.getElementById("editProfileForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
-            // Example: Update displayed profile info
-            document.getElementById("modal-member-name").textContent = document.getElementById("editName").value;
-            document.getElementById("profileBirthdate").textContent = document.getElementById("editBirthdate").value;
-            document.getElementById("profileBaptistDate").textContent = document.getElementById("editBaptistDate").value;
-            document.getElementById("profileBaptismPlace").textContent = document.getElementById("editBaptismPlace").value;
-            document.getElementById("profileWitnesses").textContent = document.getElementById("editWitnesses").value;
-            document.getElementById("profileFather").textContent = document.getElementById("editFather").value;
-            document.getElementById("profileMother").textContent = document.getElementById("editMother").value;
-            document.getElementById("profileContact").textContent = document.getElementById("editContact").value;
-            document.getElementById("profileEmail").textContent = document.getElementById("editEmail").value;
-            document.getElementById("profileFacebook").textContent = document.getElementById("editFacebook").value;
-            document.getElementById("profileAddress").textContent = document.getElementById("editAddress").value;
+            const memberId = document.getElementById("memberId").value;
+            const data = {
+                id: memberId,
+                name: document.getElementById("editName").value,
+                birthdate: document.getElementById("editBirthdate").value,
+                date_baptized: document.getElementById("editBaptistDate").value,
+                place_baptism: document.getElementById("editBaptismPlace").value,
+                witnesses: document.getElementById("editWitnesses").value,
+                father: document.getElementById("editFather").value,
+                mother: document.getElementById("editMother").value,
+                contact: document.getElementById("editContact").value,
+                email: document.getElementById("editEmail").value,
+                facebook: document.getElementById("editFacebook").value,
+                address: document.getElementById("editAddress").value
+            };
 
-            // Switch back to view mode
-            document.getElementById("editProfileForm").style.display = "none";
-            document.getElementById("profileView").style.display = "block";
+            fetch("/api/members/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        alert("✅ Member updated successfully!");
+                        closeModal();
+                        location.reload();
+                    } else {
+                        alert("❌ Error: " + response.error);
+                    }
+                });
         });
 
+        // 📸 Handle Image Upload & Save
+        document.getElementById("profileImageInput").addEventListener("change", function () {
+            const file = this.files[0];
+            const memberId = document.getElementById("memberId")?.value;
 
+            if (!file) return alert("Please select an image first.");
+            if (!memberId) return alert("Please open a member profile first.");
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("id", memberId);
+
+            fetch("/upload_image", { method: "POST", body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.url) {
+                        const img = document.getElementById("modal-member-image");
+                        img.src = data.url;
+                        img.onerror = () => {
+                            img.src = "{{ url_for('static', filename='images/user.png') }}";
+                        };
+                        alert("✅ Profile image updated successfully!");
+                    } else {
+                        alert("⚠️ Upload failed: " + (data.error || "Unknown error"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Upload error:", err);
+                    alert("❌ Something went wrong while uploading.");
+                })
+                .finally(() => {
+                    this.value = ""; // reset file input
+                });
+        });
     </script>
 
 
-
+    <!-- Separate attendance loader script -->
     <script>
         function loadAttendance(name) {
             document.getElementById('member-name-title').innerText = `Attendance for ${name}`;
@@ -553,21 +666,24 @@
             fetch(`/api/member_attendance/${encodeURIComponent(name)}`)
                 .then(res => res.json())
                 .then(data => {
+                    data.sort((a, b) => new Date(b.date) - new Date(a.date)); // newest first
                     data.forEach((entry, index) => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.date}</td>
-            <td class="${entry.present ? 'present' : 'absent'}">
-              ${entry.present ? '✔️ Present' : '❌ Absent'}
-            </td>
-          `;
+                    <td>${index + 1}</td>
+                    <td>${formatDatePretty(entry.date)}</td>
+                    <td class="${entry.present ? 'present' : 'absent'}">
+                        ${entry.present ? '✔️ Present' : '❌ Absent'}
+                    </td>
+                `;
                         tbody.appendChild(row);
                     });
                     table.style.display = 'table';
                 });
         }
     </script>
+
+
 
 </body>
 
