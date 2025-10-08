@@ -155,9 +155,19 @@
                 {% for member in members_in_month %}
                 {% set is_today = (member.birth_day == today.day and member.birth_month == today.month) %}
                 <div class="member-row {% if is_today %}today-birthday{% endif %}">
-                    <div class="member-name">{{ member.full_name }} {% if is_today %}🎉{% endif %}</div>
-                    <div class="member-age">Current Age: {{ member.current_age }}</div>
-                    <div class="member-next-age">After Birthday: {{ member.next_age }}</div>
+                    <div class="member-name">
+                        {{ member.full_name }}
+                        {% if is_today %}🎉{% endif %}
+                    </div>
+                    <div class="member-birthday">
+                        Birthday: {{ member.birth_month|month_name }} {{ member.birth_day }}
+                    </div>
+                    <div class="member-age">
+                        Current Age: {{ member.current_age }}
+                    </div>
+                    <div class="member-next-age">
+                        After Birthday: {{ member.next_age }}
+                    </div>
                 </div>
                 {% endfor %}
             </div>

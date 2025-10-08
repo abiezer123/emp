@@ -20,6 +20,7 @@ import cloudinary.uploader
 import cloudinary.api
 from datetime import date, datetime
 from pymongo import UpdateOne
+import calendar
 
 load_dotenv()  # Load .env file
 
@@ -563,10 +564,14 @@ def upload_image():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Jinja filter to convert month number to month name
+@app.template_filter('month_name')
+def month_name_filter(month_number):
+    return calendar.month_name[month_number]  # 1 -> January, 2 -> February, etc.
 
 @app.route('/birthdays')
 def birthdays():
-    members = list(members_collection.find())  # or wherever your members are stored
+    members = list(members_collection.find())  # get all members
 
     months = [
         "January", "February", "March", "April", "May", "June",
@@ -575,19 +580,24 @@ def birthdays():
 
     birthdays_dict = {month: [] for month in months}
 
+    today = date.today()
+
     for m in members:
         if m.get('birthdate'):
-            bdate = m['birthdate']  # 'YYYY-MM-DD' string
+            bdate = m['birthdate']  # 'YYYY-MM-DD'
             b = date.fromisoformat(bdate)
             month_name = months[b.month - 1]
-            today = date.today()
+
+            # Calculate current age
             current_age = today.year - b.year
-            # If birthday hasn't occurred yet this year
             if (today.month, today.day) < (b.month, b.day):
                 current_age -= 1
             next_age = current_age + 1
+
             birthdays_dict[month_name].append({
                 'full_name': m.get('full_name') or m.get('name'),
+                'birth_month': b.month,
+                'birth_day': b.day,
                 'current_age': current_age,
                 'next_age': next_age
             })
@@ -595,7 +605,12 @@ def birthdays():
     # Remove months with no birthdays
     birthdays_dict = {k: v for k, v in birthdays_dict.items() if v}
 
+    # Sort each month’s list by day
+    for month, members_list in birthdays_dict.items():
+        birthdays_dict[month] = sorted(members_list, key=lambda x: x['birth_day'])
+
     return render_template("birthdays.html", birthdays=birthdays_dict, now=datetime.now())
+
 
 if __name__ == '__main__':
     app.run(debug=True)
