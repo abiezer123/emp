@@ -101,7 +101,7 @@ main {
     background: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -467,7 +467,7 @@ body {
         margin: 8px auto;
         padding: 12px 16px;
         border-radius: 10px;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.12);
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.30);
         box-sizing: border-box;
     }
 
@@ -547,11 +547,12 @@ body {
 
 #members_partition {
     border-radius: 10px;
-    margin: 10px 0px;
-    max-width: 1400px;
+    margin: 0px;
+    max-width: 1500px;
+    width: 100%;
     background: white;
     padding: 10px 20px;
-    box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 10px 2px rgba(0, 0, 0, 0.30);
 
 }
 
