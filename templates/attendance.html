@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Attendance Management</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -49,12 +50,21 @@
                     <div class="suggestions-container">
                         <input type="text" id="name" placeholder="Enter name" required />
                         <ul id="suggestions" class="suggestions-list hidden"></ul>
+                        <br>
+
+                        <label for="online">Online</label>
+                        <label class="switch">
+                            <input type="checkbox" id="online" name="is_online" value="online">
+                            <span class="slider round"></span>
+                        </label>
 
                         <label for="visitor">Visitor</label>
                         <label class="switch">
                             <input type="checkbox" id="visitor" name="is_visitor" value="visitor">
                             <span class="slider round"></span>
                         </label>
+
+
                     </div>
 
                     <input type="datetime-local" id="date" required />
@@ -105,7 +115,11 @@
                 <h3 id="dateForHeading" style="text-align: center; font-size: 28px;"></h3>
                 <div style="display: flex; align-items: center; gap: 50px;">
                     <input type="date" id="filter-date" />
-                    <button type="button" style="background-color: #27ae60;" onclick="openBulkEditModal()">Edit</button>
+                    <button type="button" id="table-edit-button"
+                        style="background-color: #27ae60; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer;"
+                        onclick="openBulkEditModal()">
+                        <span class="material-icons" style="color: white; vertical-align: middle;">edit</span>
+                    </button>
                 </div>
 
                 <!-- Modal -->
@@ -129,7 +143,7 @@
                         <tr>
                             <th>#</th>
                             <th>Name</th>
-                            <th>Date & Time</th>
+                            <th>Time</th>
                             <th>Action</th>
                         </tr>
                     </thead>

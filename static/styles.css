@@ -19,6 +19,7 @@ body {
     display: inline-block;
     width: 40px;
     height: 25px;
+    margin: 10px;
 }
 
 /* Hide the default checkbox */
@@ -100,7 +101,7 @@ main {
 .partition {
     background: white;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 10px;    
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -193,6 +194,7 @@ td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #e1e4e8;
+    font-weight: bold;
 }
 
 tr:last-child td {
@@ -442,74 +444,6 @@ body {
     color: #1f2a40;
 }
 
-/* --- MOBILE STYLES --- */
-@media (max-width: 768px) {
-
-
-    /* make main a vertical flex container */
-    main {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        margin: 20px 16px;
-    }
-
-    /* remove the wrapper from layout so its children act like main's children */
-    .left-column,
-    .right-column {
-        display: contents;
-    }
-
-    /* partitions styling on mobile */
-    .partition {
-        width: 92%;
-        margin: 8px auto;
-        padding: 12px 16px;
-        border-radius: 10px;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.30);
-        box-sizing: border-box;
-    }
-
-    /* now order applies because partitions are direct children of main */
-    #attendance_partition {
-        order: 1;
-    }
-
-    #partition-attendance-table {
-        order: 2;
-    }
-
-    /* make sure this id exactly matches your HTML */
-    #dashboard-controls-partition {
-        order: 3;
-    }
-
-    #attendance-summary-partition {
-        order: 4;
-    }
-
-    #top-attendees-partition {
-        order: 5;
-    }
-
-    #download-partition {
-        order: 6;
-    }
-
-
-
-    #date {
-        width: 97%;
-        height: 45px;
-    }
-
-    #name {
-        width: 62%;
-        height: 45px;
-    }
-}
-
 
 
 .nav-toggle-label {
@@ -614,4 +548,75 @@ body {
 /* Hidden class */
 .hidden {
     display: none !important;
+}
+
+
+/* --- MOBILE STYLES --- */
+@media (max-width: 768px) {
+
+
+    /* make main a vertical flex container */
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 16px;
+    }
+
+    /* remove the wrapper from layout so its children act like main's children */
+    .left-column,
+    .right-column {
+        display: contents;
+    }
+
+    /* partitions styling on mobile */
+    .partition {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.30);
+        box-sizing: border-box;
+    }
+
+    /* now order applies because partitions are direct children of main */
+    #attendance_partition {
+        order: 1;
+    }
+
+    #partition-attendance-table {
+        order: 2;
+    }
+
+    /* make sure this id exactly matches your HTML */
+    #dashboard-controls-partition {
+        order: 3;
+    }
+
+    #attendance-summary-partition {
+        order: 4;
+    }
+
+    #top-attendees-partition {
+        order: 5;
+    }
+
+    #download-partition {
+        order: 6;
+    }
+
+
+
+    #date {
+        width: 97%;
+        height: 45px;
+    }
+
+    #name {
+        width: 95%;
+        height: 45px;
+    }
+
+
+
 }

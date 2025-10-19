@@ -72,7 +72,7 @@ def attendance():
         return redirect(url_for('login'))
     return render_template('attendance.html')
 
-# i want to add visitor here
+# add visitor 
 @app.route('/api/attendance', methods=['POST'])
 def add_attendance():
     try:
@@ -80,6 +80,7 @@ def add_attendance():
         name = data.get('name', '').strip()
         date_str = data.get('date', '').strip()
         is_visitor = bool(data.get('is_visitor', False))
+        is_online = bool(data.get('is_online', False))
         
         if not name or not date_str:
             return jsonify({'error': 'Name and date are required'}), 400
@@ -107,7 +108,8 @@ def add_attendance():
         record = {
             'name': name,
             'date': date,
-            'is_visitor': is_visitor
+            'is_visitor': is_visitor,
+            'is_online': is_online
         }
         attendance_collection.insert_one(record)
 
@@ -138,7 +140,8 @@ def get_attendance():
             '_id': str(doc['_id']),
             'name': doc['name'],
             'date': doc['date'].isoformat(),
-            'is_visitor': doc.get('is_visitor', False)
+            'is_visitor': doc.get('is_visitor', False),
+            'is_online': doc.get('is_online', False)
         })
     return jsonify({'records': records})
 

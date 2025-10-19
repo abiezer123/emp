@@ -321,12 +321,21 @@ function renderAttendanceTable(records) {
         return;
     }
 
-    // Sort so visitors go last
+    // Sort so visitors go first
     records.sort((a, b) => {
         if (a.is_visitor && !b.is_visitor) return -1; // visitor first
         if (!a.is_visitor && b.is_visitor) return 1;
         return 0;
     });
+
+    // Sort so online go first
+    records.sort((a, b) => {
+        if (a.is_online && !b.is_online) return 1;
+        if (!a.is_online && b.is_online) return -1;
+        return 0;
+    });
+
+
 
     attendanceTableBody.innerHTML = '';
     records.forEach((r, index) => {
@@ -334,13 +343,19 @@ function renderAttendanceTable(records) {
 
         // Highlight if visitor
         if (r.is_visitor) {
-            tr.style.backgroundColor = '#bff1bfff';
+            tr.style.backgroundColor = '#faebd8ff';
+            tr.style.fontWeight = 'bold';
+        }
+
+        if (r.is_online) {
+            tr.style.backgroundColor = '#d5f5d8ff';
             tr.style.fontWeight = 'bold';
         }
 
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${r.name}${r.is_visitor ? ' (Visitor)' : ''}</td>
+            <td>  ${r.name}${r.is_visitor ? ' (Visitor)' : ''} 
+  ${r.is_online ? ' (🟢 Online)' : ''}</td>
             <td>${formatDateTime(r.date)}</td>
             <td><button class="btn-delete" data-id="${r._id}">Delete</button></td>
         `;
@@ -385,6 +400,7 @@ attendanceForm.addEventListener('submit', async (e) => {
     const name = nameInput.value.trim();
     const datetime = dateInput.value;
     const isVisitor = document.getElementById('visitor').checked;
+    const isOnline = document.getElementById("online").checked;
 
     if (!name || !datetime) {
         alert('Please fill in the name and date.');
@@ -399,7 +415,8 @@ attendanceForm.addEventListener('submit', async (e) => {
             body: JSON.stringify({
                 name: name,
                 date: datetime,
-                is_visitor: isVisitor
+                is_visitor: isVisitor,
+                is_online: isOnline
             })
         });
 
@@ -417,6 +434,7 @@ attendanceForm.addEventListener('submit', async (e) => {
         loadRecordsForFilterDate();
         nameInput.focus();
         document.getElementById('visitor').checked = false;
+        document.getElementById('online').checked = false;
 
     } catch (err) {
         alert('Error adding attendance entry.');
