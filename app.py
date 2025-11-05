@@ -81,7 +81,8 @@ def add_attendance():
         date_str = data.get('date', '').strip()
         is_visitor = bool(data.get('is_visitor', False))
         is_online = bool(data.get('is_online', False))
-        
+        is_child = bool(data.get('is_child', False))
+
         if not name or not date_str:
             return jsonify({'error': 'Name and date are required'}), 400
 
@@ -109,7 +110,9 @@ def add_attendance():
             'name': name,
             'date': date,
             'is_visitor': is_visitor,
-            'is_online': is_online
+            'is_online': is_online,
+            'is_child': is_child,
+
         }
         attendance_collection.insert_one(record)
 
@@ -141,7 +144,8 @@ def get_attendance():
             'name': doc['name'],
             'date': doc['date'].isoformat(),
             'is_visitor': doc.get('is_visitor', False),
-            'is_online': doc.get('is_online', False)
+            'is_online': doc.get('is_online', False),
+            'is_child': doc.get('is_child', False)
         })
     return jsonify({'records': records})
 

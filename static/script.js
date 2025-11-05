@@ -320,47 +320,39 @@ function renderAttendanceTable(records) {
         attendanceTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No records found for this date.</td></tr>';
         return;
     }
-
-    // Sort so visitors go first
-    records.sort((a, b) => {
-        if (a.is_visitor && !b.is_visitor) return -1; // visitor first
-        if (!a.is_visitor && b.is_visitor) return 1;
-        return 0;
-    });
-
-    // Sort so online go first
-    records.sort((a, b) => {
-        if (a.is_online && !b.is_online) return 1;
-        if (!a.is_online && b.is_online) return -1;
-        return 0;
-    });
-
-
+    records.sort((a, b) =>
+        (a.is_child - b.is_child) || (a.is_online - b.is_online) || (a.is_visitor - b.is_visitor)
+    );
 
     attendanceTableBody.innerHTML = '';
     records.forEach((r, index) => {
         const tr = document.createElement('tr');
 
-        // Highlight if visitor
+        // Determine label
+        let labels = [];
+        if (r.is_child) labels.push('Child');
+        if (r.is_visitor) labels.push('Visitor');
+        if (r.is_online) labels.push('🟢 Online');
+        if (!r.is_visitor && !r.is_online && !r.is_child) labels.push('-'); // Default
+
+        // Optional: highlight row based on type
         if (r.is_visitor) {
             tr.style.backgroundColor = '#faebd8ff';
             tr.style.fontWeight = 'bold';
-        }
-
-        if (r.is_online) {
+        } else if (r.is_online) {
             tr.style.backgroundColor = '#d5f5d8ff';
             tr.style.fontWeight = 'bold';
         }
 
         tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>  ${r.name}${r.is_visitor ? ' (Visitor)' : ''} 
-  ${r.is_online ? ' (🟢 Online)' : ''}</td>
-            <td>${formatDateTime(r.date)}</td>
-            <td><button class="btn-delete" data-id="${r._id}">Delete</button></td>
-        `;
+        <td>${index + 1}</td>
+        <td>${r.name}</td>
+        <td>${labels.join(', ')}</td>
+        <td><button class="btn-delete" data-id="${r._id}">Delete</button></td>
+    `;
         attendanceTableBody.appendChild(tr);
     });
+
 
     attachDeleteHandlers();
 }
@@ -401,7 +393,12 @@ attendanceForm.addEventListener('submit', async (e) => {
     const datetime = dateInput.value;
     const isVisitor = document.getElementById('visitor').checked;
     const isOnline = document.getElementById("online").checked;
-
+    const isChild = document.getElementById("children").checked;
+    fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, date, is_child: isChild })
+    });
     if (!name || !datetime) {
         alert('Please fill in the name and date.');
         return;
@@ -416,7 +413,8 @@ attendanceForm.addEventListener('submit', async (e) => {
                 name: name,
                 date: datetime,
                 is_visitor: isVisitor,
-                is_online: isOnline
+                is_online: isOnline,
+                is_child: isChild
             })
         });
 
@@ -435,6 +433,7 @@ attendanceForm.addEventListener('submit', async (e) => {
         nameInput.focus();
         document.getElementById('visitor').checked = false;
         document.getElementById('online').checked = false;
+        document.getElementById('children').checked = false;
 
     } catch (err) {
         alert('Error adding attendance entry.');
