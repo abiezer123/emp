@@ -337,7 +337,7 @@ function renderAttendanceTable(records) {
 
         // Optional: highlight row based on type
         if (r.is_visitor) {
-            tr.style.backgroundColor = '#faebd8ff';
+            tr.style.backgroundColor = '#f3ff83ff';
             tr.style.fontWeight = 'bold';
         } else if (r.is_online) {
             tr.style.backgroundColor = '#d5f5d8ff';
