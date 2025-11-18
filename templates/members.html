@@ -15,8 +15,6 @@
             background-color: #f5f7fa;
         }
 
-
-
         main {
             padding: 2rem;
             max-width: 1000px;
@@ -28,55 +26,294 @@
             margin-bottom: 1rem;
         }
 
-        .members-container {
+        /* Tabs */
+        .tabs {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 10px;
         }
 
-        .member-btn:hover {
-            background-color: #16a085;
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            background: #f1f1f1;
+            color: black;
+            border: none;
+            outline: none;
+            font-weight: 600;
+            border-radius: 6px 6px 0 0;
+            transition: 0.3s;
         }
 
-        table {
+        .tab-btn.active {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Search Bar */
+        #searchInput,
+        #searchAttendee {
             width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            max-width: 400px;
+            padding: 0.6rem 0.8rem;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            transition: border 0.3s;
         }
 
-        th,
-        td {
-            padding: 0.8rem;
+        #searchInput:focus,
+        #searchAttendee:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        /* Members / Attendees List */
+        .members-list-vertical {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .members-list-vertical li button.member-btn {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-left: 6px solid #3498db;
+        }
+
+        .members-list-vertical li button.member-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            background-color: #f9f9f9;
+        }
+
+        /* Member Image */
+        .member-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #3498db;
+        }
+
+        .member-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .member-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: black;
+        }
+
+        .member-id {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 99;
+            left: 0;
+            top: 30px;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .profile-header h3 {
+            font-size: 25px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+        }
+
+        /* Attendance Table */
+        .modal-content table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content th {
+            background-color: #3498db;
+            color: #fff;
+            padding: 12px;
             text-align: center;
+        }
+
+        .modal-content td {
+            padding: 10px;
+            text-align: center;
+            background-color: #ffffff;
             border-bottom: 1px solid #eee;
         }
 
-        th {
-            background-color: #ecf0f1;
-            color: #333;
+        .modal-content tbody tr:nth-child(even) td {
+            background-color: #f5f7fa;
         }
 
-        td.present {
-            color: green;
+        .present {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .absent {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        /* Profile Info */
+        #profileView {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        #profileView p {
+            display: flex;
+            gap: 10px;
+            margin: 0;
+        }
+
+        #profileView p strong {
+            width: 160px;
+            font-weight: 600;
+            color: #555;
+            text-align: left;
+        }
+
+        #profileView p span {
+            font-weight: 700;
+            color: #222;
+            text-align: left;
+            font-size: 1.05rem;
+        }
+
+        #editProfileBtn {
+            display: inline-block;
+            margin: 20px 0 0;
+            padding: 10px 25px;
+            border: none;
+            background-color: #4CAF50;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #editProfileBtn:hover {
+            background-color: #45a049;
+        }
+
+        /* Edit Form */
+        #editProfileForm label {
             font-weight: bold;
+            margin-top: 0.5rem;
         }
 
-        td.absent {
-            color: red;
-            font-weight: bold;
+        #editProfileForm input {
+            width: 100%;
+            padding: 6px 10px;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
-        @media (max-width: 600px) {
-            .members-container {
-                flex-direction: column;
-            }
+        #editProfileForm .save-btn,
+        #editProfileForm .cancel-btn {
+            padding: 8px 16px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-            .member-btn {
-                width: 100%;
+        #editProfileForm .save-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        #editProfileForm .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .members-list-vertical li button.member-btn {
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 12px;
             }
         }
     </style>
@@ -85,9 +322,7 @@
 <body>
     <header>
         <nav class="navbar">
-            <div class="navbar-brand">
-                Empire Church
-            </div>
+            <div class="navbar-brand">Empire Church</div>
 
             <!-- Burger icon (mobile only) -->
             <input type="checkbox" id="nav-toggle" class="nav-toggle" />
@@ -123,10 +358,6 @@
         </nav>
     </header>
 
-
-
-
-
     <main>
         <div class="partition" id="members_partition">
             <!-- Tabs -->
@@ -135,6 +366,7 @@
                 <button class="tab-btn" onclick="openTab(event, 'membersTab')">Members</button>
             </div>
 
+            <!-- Attendees Tab -->
             <div id="attendeesTab" class="tab-content active">
                 <h2>Attendees</h2>
                 <input type="text" id="searchAttendee" placeholder="Search attendee..." />
@@ -142,7 +374,11 @@
                     {% for name in attendees %}
                     <li>
                         <button class="member-btn" onclick="openMemberModal('{{ name }}')">
-                            <span class="member-name">{{ name }}</span>
+                            <img src="{{ url_for('static', filename='images/user.png') }}" alt="Profile"
+                                class="member-image" />
+                            <div class="member-info">
+                                <span class="member-name">{{ name }}</span>
+                            </div>
                         </button>
                     </li>
                     {% endfor %}
@@ -159,17 +395,17 @@
                         <button class="member-btn" onclick="openMemberModal('{{ member.name }}', '{{ member.id }}')">
                             <img src="{{ member.image_url if member.image_url else url_for('static', filename='images/user.png') }}"
                                 alt="Profile" class="member-image" />
-                            {{ member.full_name or member.name }}
+                            <div class="member-info">
+                                <span class="member-name">{{ member.full_name or member.name }}</span>
+                                <span class="member-id">ID: {{ member.id }}</span>
+                            </div>
                         </button>
                     </li>
                     {% endfor %}
                 </ol>
-
             </div>
-
         </div>
     </main>
-
 
     <!-- Modal -->
     <div class="modal" id="memberModal">
@@ -189,7 +425,7 @@
                 <button class="tab-btn" onclick="openTab(event, 'profileTab')">Information</button>
             </div>
 
-            <!-- Tab Content -->
+            <!-- Attendance Tab -->
             <div id="attendanceTab" class="tab-content active">
                 <table>
                     <thead>
@@ -203,8 +439,8 @@
                 </table>
             </div>
 
+            <!-- Profile Tab -->
             <div id="profileTab" class="tab-content">
-                <!-- Profile Information (Read Only) -->
                 <div id="profileView">
                     <p><strong>Full Name:</strong> <span id="profileFullName">---</span></p>
                     <p><strong>Age:</strong> <span id="profileAge">---</span></p>
@@ -222,12 +458,9 @@
                     <button id="editProfileBtn" class="edit-btn">Edit Profile</button>
                 </div>
 
-                <!-- Profile Edit Form (Hidden by Default) -->
-                <!-- Profile Edit Form (Hidden by Default) -->
+                <!-- Edit Form -->
                 <form id="editProfileForm" style="display: none;">
-                    <!-- Hidden field to keep track of original member name -->
                     <input type="hidden" id="memberId" />
-
                     <input type="hidden" id="originalName" />
 
                     <label>Profile Picture</label>
@@ -270,361 +503,8 @@
                     <button type="button" id="cancelEditBtn" class="cancel-btn">Cancel</button>
                 </form>
             </div>
-
         </div>
     </div>
-
-
-    <style>
-        /* Container */
-        #profileView {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 10px 0;
-        }
-
-        /* Each info row */
-        #profileView p {
-            display: flex;
-            gap: 10px;
-            margin: 0;
-        }
-
-        /* Labels */
-        #profileView p strong {
-            width: 160px;
-            /* fixed width for alignment */
-            font-weight: 600;
-            color: #555;
-            text-align: left;
-            /* ensure label text is left aligned */
-        }
-
-        /* Values */
-        #profileView p span {
-            font-weight: 700;
-            /* bold */
-            color: #222;
-            text-align: left;
-            /* make value also left-aligned */
-            font-size: 1.05rem;
-            /* slightly bigger */
-        }
-
-        /* Profile card container */
-        .profile-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            max-width: 600px;
-            margin: 0 auto;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-
-        /* Each row: label and value */
-        .profile-row {
-            display: flex;
-            justify-content: flex-start;
-            /* left aligned */
-            gap: 10px;
-            /* space between label and value */
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* Labels */
-        .profile-row .label {
-            font-weight: 600;
-            color: #555;
-            width: 160px;
-            /* fixed width for alignment */
-        }
-
-        /* Values - highlighted */
-        .profile-row .value {
-            font-weight: 700;
-            /* bold */
-            font-size: 1.05rem;
-            /* slightly bigger */
-            color: #222;
-        }
-
-        /* Edit button styling */
-        #editProfileBtn {
-            display: inline-block;
-            margin: 20px 0 0;
-            padding: 10px 25px;
-            border: none;
-            background-color: #4CAF50;
-            color: #fff;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        #editProfileBtn:hover {
-            background-color: #45a049;
-        }
-
-        /* Profile container with vertical spacing */
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-        }
-
-
-
-        /* Labels bold */
-        .profile-row strong {
-            flex: 1;
-        }
-
-        /* Values */
-        .profile-row span {
-            flex: 2;
-            text-align: right;
-        }
-
-        /* Edit Form */
-        #editProfileForm label {
-            font-weight: bold;
-            margin-top: 0.5rem;
-        }
-
-        #editProfileForm input {
-            width: 100%;
-            padding: 6px 10px;
-            margin-bottom: 0.5rem;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-
-        /* Buttons container */
-        .form-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .members-list-vertical {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-
-        .member-btn:hover {
-            background: #f2f2f2;
-        }
-
-        .member-image {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #ddd;
-        }
-
-        #searchInput {
-            width: 100%;
-            max-width: 400px;
-            padding: 0.6rem;
-            margin: 1rem 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-
-        .members-list-vertical {
-            list-style: decimal inside;
-            margin: 0;
-            padding-left: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .member-btn {
-            background-color: #ffffff;
-            color: #333;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            width: 80%;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 10px;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 10px;
-        }
-
-        .members-list-vertical li button.member-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #ffffff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            width: 90%;
-            text-align: left;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border-left: 5px solid #298dcf;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            /* the blue bar on the left */
-        }
-
-        .members-list-vertical li button.member-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-        }
-
-
-        .member-btn:hover {
-            background-color: #e0e0e0;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 99;
-            left: 0;
-            top: 30px;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80%;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            /* spacing between image & name */
-            margin-bottom: 15px;
-            flex-shrink: 0;
-            /* prevent shrinking */
-        }
-
-        .profile-header h3 {
-            font-size: 25px;
-            /* larger font for name */
-            font-weight: 700;
-            /* bold name */
-            margin: 0;
-            /* remove default margin */
-        }
-
-        .profile-img {
-            width: 140px !important;
-            /* fixed width */
-            height: 140px !important;
-            /* fixed height for perfect circle */
-            border-radius: 50% !important;
-            /* circle */
-            object-fit: cover !important;
-            /* cover entire circle */
-            border: 3px solid #007bff !important;
-            /* fixed border color */
-            pointer-events: none !important;
-            /* prevent dragging/clicking */
-            user-select: none !important;
-            /* prevent selection */
-            flex-shrink: 0;
-            /* prevent shrinking */
-        }
-
-
-        .close-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .modal-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .modal-content th,
-        .modal-content td {
-            padding: 0.6rem;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-        }
-
-        .present {
-            color: green;
-            font-weight: bold;
-        }
-
-        .absent {
-            color: red;
-            font-weight: bold;
-        }
-
-
-
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #ddd;
-            margin-bottom: 10px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            cursor: pointer;
-            background: #f1f1f1;
-            color: black;
-            border: none;
-            outline: none;
-        }
-
-        .tab-btn.active {
-            background: #3498db;
-            color: white;
-            font-weight: bold;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -844,12 +724,7 @@
                     alert("❌ Something went wrong while uploading.");
                 });
         });
-    </script>
 
-
-
-    <!-- Separate attendance loader script -->
-    <script>
         function loadAttendance(name) {
             document.getElementById('member-name-title').innerText = `Attendance for ${name}`;
             const table = document.getElementById('attendance-status');
@@ -874,9 +749,6 @@
                 });
         }
     </script>
-
-
-
 </body>
 
 </html>
