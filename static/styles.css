@@ -19,7 +19,7 @@ body {
     display: inline-block;
     width: 40px;
     height: 25px;
-    margin: 10px;
+    margin: 8px;
 }
 
 /* Hide the default checkbox */
@@ -34,8 +34,8 @@ body {
     position: absolute;
     cursor: pointer;
     top: 0;
-    left: 0;
-    right: 0;
+    left: -10px;
+    right: 10px;
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
@@ -72,6 +72,7 @@ input:checked+.slider:before {
     border-radius: 50%;
 }
 
+
 main {
     display: flex;
     justify-content: space-between;
@@ -87,6 +88,7 @@ main {
     flex-direction: column;
     gap: 20px;
     width: 48%;
+    margin-left: -20px;
 }
 
 .right-column {
@@ -551,13 +553,21 @@ body {
     display: none !important;
 }
 
+.switch-label-and-switch {
+    display: inline;
+    /* or inline-block */
+    margin-left: -5px;
+
+}
+
+
 @media (min-width: 769px) {
     .navbar {
         position: fixed;
         top: 0;
         left: 0;
         height: 100vh;
-        width: 240px;
+        width: 210px;
         border-radius: 0;
         margin: 0;
         padding: 2rem 1rem;
@@ -622,6 +632,8 @@ body {
         margin-right: 40px;
         transition: margin-left 0.3s ease;
     }
+
+
 }
 
 /* --- MOBILE STYLES --- */
@@ -691,5 +703,9 @@ body {
     }
 
 
-
+    .switch-label-and-switch {
+        display: block;
+        width: 100%;
+        /* forces it to take full line */
+    }
 }
