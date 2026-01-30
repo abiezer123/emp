@@ -36,7 +36,11 @@ window.addEventListener('DOMContentLoaded', () => {
     changeDateLabel();
     loadRecordsForFilterDate();
     updateUI();
-    initMemberModal()
+    initMemberModal();
+    kuromiActions();
+
+
+
 });
 
 function updateUI() {
@@ -680,4 +684,124 @@ function changeDateLabel() {
     if (headingEl) {
         headingEl.textContent = dateObj.toLocaleDateString('en-US', options);
     }
+}
+
+function kuromiActions() {
+    const gif = document.getElementById("floatingGif");
+
+    // Array of your GIFs
+    const gifs = [
+        "/static/images/melody.gif",
+        "/static/images/kuromi-sanrio.gif",
+        "/static/images/18725.png",
+        "/static/images/rosie.png",
+        "/static/images/love.gif"
+
+    ];
+
+    let currentIndex = 0; // start at first GIF
+
+    gif.addEventListener("click", () => {
+        // move to next GIF
+        currentIndex = (currentIndex + 1) % gifs.length; // loop back to start
+        gif.style.backgroundImage = `url("${gifs[currentIndex]}")`;
+    });
+
+    //kuromi
+    const kuromi = document.getElementById("kuromi1");
+    const img = kuromi;
+
+    const normalGif = "/static/images/kuromi.gif";
+    const firstClickGif = "/static/images/no.gif";
+    const multiClickGif = "/static/images/angry.gif";
+
+    let clickCount = 0;
+    let timeoutId = null;
+    let resetClickTimer = null;
+
+    // Click-count logic on Kuromi
+    img.addEventListener("click", function () {
+        clickCount++;
+
+        // Clear any previous timeout for reverting image
+        if (timeoutId) clearTimeout(timeoutId);
+
+        if (clickCount === 1) {
+            // first click → no.gif
+            img.src = firstClickGif;
+        } else if (clickCount >= 3) {
+            // 3rd click or more → angry.gif
+            img.src = multiClickGif;
+        }
+
+        // Reset image back to normal after 3 seconds
+        timeoutId = setTimeout(() => {
+            img.src = normalGif;
+        }, 3000);
+
+        // Reset click count after 1 second of inactivity
+        if (resetClickTimer) clearTimeout(resetClickTimer);
+        resetClickTimer = setTimeout(() => {
+            clickCount = 0;
+        }, 1000); // adjust 1000ms as max delay between clicks
+    });
+
+    // Heart pumping logic
+    const heart = document.getElementById("heartIcon");
+    const blushGif = "/static/images/blush.gif";
+
+    heart.addEventListener("click", () => {
+        // Start pumping animation
+        heart.classList.add("pumping");
+
+        // Change Kuromi to blush
+        kuromi.src = blushGif;
+
+        // Stop animation and revert Kuromi after 20 seconds
+        setTimeout(() => {
+            heart.classList.remove("pumping");
+            kuromi.src = normalGif;
+        }, 10000); // 20 seconds
+    });
+
+
+
+    const kuromi2 = document.getElementById("kuromi2");
+    const heart2 = document.getElementById("heart1");
+
+    const normalKnock = "/static/images/knock.gif";
+    let revertTimer = null;
+
+    // when knock gif is clicked
+    kuromi2.addEventListener("click", () => {
+        clearTimeout(revertTimer);
+
+        // change to angry
+        kuromi2.src = "/static/images/bitAngry.gif";
+
+        // go back to normal after 3 seconds
+        revertTimer = setTimeout(() => {
+            kuromi2.src = normalKnock;
+        }, 3000);
+    });
+
+    // when heart is clicked
+    heart2.addEventListener("click", () => {
+        clearTimeout(revertTimer);
+
+        // heart pump animation
+        heart2.classList.remove("pumping"); // reset if spam clicked
+        void heart2.offsetWidth;         // force reflow
+        heart2.classList.add("pumpig");
+
+        kuromi2.src = "/static/images/hehe.gif";
+
+        // after a few seconds go back to normal knock
+        revertTimer = setTimeout(() => {
+            kuromi.src = normalKnock;
+        }, 3000);
+    });
+
+
+
 }

@@ -53,11 +53,23 @@
 
 
     <main>
+        <div id="floatingGif"></div>
+
         <!-- LEFT COLUMN -->
         <div class="left-column">
             <!-- Attendance Form -->
             <div class="partition" id="attendance_partition">
-                <h2 style="text-align: center;">Attendance</h2>
+                <div style="display: flex; align-items: center; gap: 10px; padding-right: 10px; position: relative;"
+                    class="header-partition">
+                    <img src="/static/images/kuromi.gif" alt="kuromi"
+                        style="height: 85px; width: 90px; margin-bottom: -20px; margin-right: -10px; margin-top: -10px; margin-left: -10px;"
+                        id="kuromi1">
+                    <h2 style="margin: 0; font-size: larger;">Attendance Form</h2>
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-left: auto; cursor: pointer;" id="heartIcon">
+                </div>
+
+                <hr>
                 <br>
                 <form id="attendance-form" autocomplete="off">
                     <div class="suggestions-container">
@@ -90,13 +102,22 @@
                     </div>
 
                     <input type="datetime-local" id="date" required />
-                    <button type="submit">Submit</button>
+                    <button type="submit">Add Attendance</button>
                 </form>
             </div>
 
             <!-- Attendance Summary -->
             <div class="partition" id="attendance-summary-partition">
-                <h3 style="text-align: center;">Attendance Summary</h3>
+                <div style="display: flex; align-items: center; gap: 10px; padding-right: 10px;"
+                    class="header-partition">
+                    <img src="/static/images/hehecute.png" alt="kuromi"
+                        style="height: 85px; width: 100px; margin-bottom: -10px; margin-right: -10px; margin-top: -10px; margin-left: -10px;"
+                        id="kuromi1">
+                    <h3 style="text-align: center; font-size: larger;">Attendance Summary</h3>
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-left: auto;">
+                </div>
+
                 <table id="summaryTable">
                     <thead>
                         <tr>
@@ -110,10 +131,18 @@
 
             <!-- Top Attendees -->
             <div class="partition" id="top-attendees-partition">
+                <div style="display: flex; align-items: center; gap: 10px; padding-right: 10px;"
+                    class="header-partition">
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-right: auto;">
+                    <h3 style="text-align: center; font-size: larger;">Top Attendees</h3>
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-left: auto;">
+                </div>
+
                 <div id="top-attendees-section">
-                    <h3 style="text-align: center; font-size: 28px; color: #7e0b0b;">⭐ Top Attendees ⭐</h3>
-                    <img src="https://gifsec.com/wp-content/uploads/2022/10/celebrate-gif-13.gif" alt="Congrats GIF"
-                        style="width: 220px; display: block; margin: 10px auto;" />
+                    <img src="/static/images/top-kuromi.gif" alt="Congrats GIF"
+                        style="width: 200px; display: block; margin: 10px auto;" />
                     <canvas id="confetti-canvas"
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                     <table id="rankingTable">
@@ -134,8 +163,24 @@
         <div class="right-column">
             <!-- Attendance Table -->
             <div class="partition" id="partition-attendance-table">
-                <h3 id="dateForHeading" style="text-align: center; font-size: 28px;"></h3>
-                <div style="display: flex; align-items: center; gap: 50px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding-right: 10px;"
+                    class="header-partition">
+
+                    <!-- knock / character gif -->
+                    <img src="/static/images/knock.gif" alt="kuromi"
+                        style="height: 95px; width: 100px; margin-bottom: -20px; margin-right: -10px; margin-top: -10px; margin-left: -10px;"
+                        id="kuromi2">
+
+                    <h3 id="dateForHeading" style="text-align: center; font-size: larger;"></h3>
+
+                    <!-- heart gif -->
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-left: auto; cursor:pointer;" id="heart1">
+                </div>
+
+
+                <hr>
+                <div style="display: flex; align-items: center; gap: 50px; margin-top: 10px;">
                     <input type="date" id="filter-date" />
                     <button type="button" id="table-edit-button"
                         style="background-color: #27ae60; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer;"
@@ -176,6 +221,14 @@
 
             <!-- Dashboard Controls -->
             <div class="partition" id="dashboard-controls-partition">
+                <div style="display: flex; align-items: center; gap: 10px; padding-right: 10px;"
+                    class="header-partition">
+                    <img src="/static/images/excited.png" alt="heart"
+                        style="height: 70px; width:80px; margin-right: auto; margin-bottom: -20px;">
+                    <h3 style="text-align: center; font-size: larger;">Dashboard</h3>
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-left: auto;">
+                </div>
                 <div class="dashboard-controls">
                     <label for="timeframe">View by:</label>
                     <select id="timeframe" onchange="updateUI()">
@@ -187,7 +240,7 @@
                     <input type="month" id="dateSelect" />
                 </div>
 
-                <h2 class="dashboard-heading">Dashboard</h2>
+
                 <div class="dashboard-scroll">
                     <canvas id="attendanceChart" style="max-width: 900px; margin-top: 2rem;"></canvas>
                 </div>
@@ -195,6 +248,16 @@
 
             <!-- Download -->
             <div class="partition" id="download-partition">
+                <div style="display: flex; align-items: center; gap: 10px; padding-right: 10px;"
+                    class="header-partition">
+                    <img src="/static/images/hey.gif" alt="kuromi"
+                        style="height: 85px; width: 110px; margin-bottom: -10px; margin-right: -10px; margin-top: -10px; margin-left: -10px;"
+                        id="kuromi1">
+                    <h3 style="text-align: center; font-size: larger;">Download</h3>
+                    <img src="/static/images/purple-heart.gif" alt="heart"
+                        style="height: 30px; width:30px; margin-left: auto;">
+                </div>
+
                 <label for="download-month">Select Month:</label>
                 <input type="month" id="download-month" />
                 <button id="download-btn">Download Attendance</button>
